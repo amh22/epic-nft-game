@@ -90,7 +90,7 @@ contract MyEpicGame is ERC721 {
     attackDamage: bossAttackDamage
   });
 
-  console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
+  // console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
 
     // Loop through all the characters, and save their values in our contract so
     // we can use them later when we mint our NFTs.
@@ -107,7 +107,7 @@ contract MyEpicGame is ERC721 {
       CharacterAttributes memory c = defaultCharacters[i];
 
       // Hardhat's use of console.log() allows up to 4 parameters in any order of following types: uint, string, bool, address
-      console.log("Done initializing %s w/ HP %s, img %s", c.name, c.hp, c.imageURI);
+      // console.log("Done initializing %s w/ HP %s, img %s", c.name, c.hp, c.imageURI);
 
     }
     // I increment tokenIds here so that my first NFT has an ID of 1.
@@ -161,7 +161,7 @@ contract MyEpicGame is ERC721 {
       attackDamage: defaultCharacters[_characterIndex].attackDamage
     });
 
-    console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
+    // console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
 
     // Keep an easy way to see who owns what NFT.
     nftHolders[msg.sender] = newItemId;
@@ -208,8 +208,8 @@ contract MyEpicGame is ERC721 {
     // Get the state of the player's NFT.
     uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
     CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
-    console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
-    console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
+    // console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
+    // console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
 
     // Make sure the player has more than 0 HP.
     require (
@@ -242,8 +242,8 @@ contract MyEpicGame is ERC721 {
     emit AttackComplete(bigBoss.hp, player.hp);
 
     // Console for ease.
-    console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
-    console.log("Boss attacked player. New player hp: %s\n", player.hp);
+    // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
+    // console.log("Boss attacked player. New player hp: %s\n", player.hp);
   }
 
 }

@@ -15,7 +15,7 @@ const main = async () => {
     50 // Boss attack damage
   )
   await gameContract.deployed()
-  console.log('Contract deployed to:', gameContract.address)
+  // console.log('Contract deployed to:', gameContract.address)
 
   let txn
   // We only have three characters.
@@ -34,7 +34,7 @@ const main = async () => {
   // since that's the standard way to retrieve the NFTs metadata.
   // * tokenURI actually has a specific format - it expects the NFT data in JSON (Base64 encoded)
   let returnedTokenUri = await gameContract.tokenURI(1)
-  console.log('Token URI:', returnedTokenUri)
+  // console.log('Token URI:', returnedTokenUri)
 }
 
 const runMain = async () => {
