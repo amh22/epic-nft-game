@@ -6,6 +6,7 @@ import './App.css'
 import SelectCharacter from './Components/SelectCharacter'
 import myEpicGame from './utils/MyEpicGame.json'
 import Arena from './Components/Arena'
+import LoadingIndicator from './Components/LoadingIndicator'
 
 // Constants
 const TWITTER_HANDLE = '_buildspace'
@@ -16,6 +17,7 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null)
 
   const [characterNFT, setCharacterNFT] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // We run this on component load
   const checkIfWalletIsConnected = async () => {
@@ -44,10 +46,17 @@ const App = () => {
     } catch (error) {
       console.log(error)
     }
+
+    setIsLoading(false)
   }
 
   // Render Methods
   const renderContent = () => {
+    //  If the app is currently loading, just render out LoadingIndicator
+    if (isLoading) {
+      return <LoadingIndicator />
+    }
+
     // Scenario #1: Does User have a wallet connected?
     if (!currentAccount) {
       return (
@@ -95,6 +104,8 @@ const App = () => {
 
   // This runs our function when the page loads.
   useEffect(() => {
+    // Anytime our component mounts, make sure to immiediately set our loading state
+    setIsLoading(true)
     checkIfWalletIsConnected()
   }, [])
 
@@ -121,6 +132,9 @@ const App = () => {
       } else {
         console.log('No character NFT found')
       }
+
+      // Once we are done with all the fetching, set loading state to false
+      setIsLoading(false)
     }
 
     // We only want to run this, if we have a connected wallet, so:
