@@ -65,7 +65,7 @@ contract MyEpicGame is ERC721 {
   event AttackComplete(uint newBossHp, uint newPlayerHp);
 
   // We pass Data into the contract when it's first created to initialize the characters.
-  // We pass these values in from from run.js.
+  // We pass these values in from from run.js or deploy.js.
   constructor(
     string[] memory characterNames,
     string[] memory characterImageURIs,
@@ -77,7 +77,7 @@ contract MyEpicGame is ERC721 {
     uint bossAttackDamage
     // Below we add some special identifier symbols for our NFT.
     // This is the name and symbol for our token, ex Ethereum and ETH. Ours is called
-    // Heroes and HERO. Remember, an NFT is just a token!
+    // Dwight Club and DUND. Remember, an NFT is just a token!
   )
     ERC721("Dwight Club", "DUND")
   {
@@ -188,7 +188,7 @@ contract MyEpicGame is ERC721 {
             charAttributes.name,
             ' -- NFT #: ',
             Strings.toString(_tokenId),
-            '", "description": "This is an NFT that lets people play in the game Metaverse Slayer!", "image": "',
+            '", "description": "This is an NFT that lets people play in the Dwight Club game!", "image": "ipfs://',
             charAttributes.imageURI,
             '", "attributes": [ { "trait_type": "Health Points", "value": ',strHp,', "max_value":',strMaxHp,'}, { "trait_type": "Attack Damage", "value": ',
             strAttackDamage,'} ]}'

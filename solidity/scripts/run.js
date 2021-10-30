@@ -3,14 +3,14 @@ const main = async () => {
   const gameContract = await gameContractFactory.deploy(
     ['Powerpuff Girl', 'Miyagi Sensei', 'Hei Hei'], // Names
     [
-      'https://i.imgur.com/X3U7OX6.png',
-      'https://i.imgur.com/FGfU7Ye.jpeg', // Images
-      'https://i.imgur.com/NBQ6YyF.png',
+      'QmdyiS166Pr8SQZPkpnmz3AGkJ7qghdAKgBEssYn6cRk82',
+      'QmZyjf4kDhQrWiTaTUK9odX7VDoeJzV5LXoSrAzSUVUTCm', // Images
+      'QmPspAQkzYn2KrV53kMWJtdyv8VxnfG1Z7R58FAgN4PZaM',
     ],
     [500, 350, 200], // HP values
     [100, 50, 25], // Attack damage values
     'Dwight Schrute', // Boss name
-    'https://i.imgur.com/2GIj41D.jpeg', // Boss image
+    'Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q', // Boss image
     10000, // Boss hp
     50 // Boss attack damage
   )
