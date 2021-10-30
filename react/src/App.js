@@ -61,7 +61,10 @@ const App = () => {
     if (!currentAccount) {
       return (
         <div className='connect-wallet-container'>
-          <img src='https://i.imgur.com/2GIj41D.jpeg' alt='Dwight Club' />
+          <img
+            src={`https://cloudflare-ipfs.com/ipfs/Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q`}
+            alt='Dwight Club'
+          />
           <button className='cta-button connect-wallet-button' onClick={connectWalletAction}>
             Connect Wallet To Get Started
           </button>

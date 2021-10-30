@@ -39,19 +39,22 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
   // Render Methods
   const renderCharacters = () =>
-    characters.map((character, index) => (
-      <div className='character-item' key={character.name}>
-        <div className='name-container'>
-          <p>{character.name}</p>
+    characters.map((character, index) => {
+      console.log(character)
+      return (
+        <div className='character-item' key={character.name}>
+          <div className='name-container'>
+            <p>{character.name}</p>
+          </div>
+          <img src={`https://cloudflare-ipfs.com/ipfs/${character.imageURI}`} alt={character.name} />
+          <button
+            type='button'
+            className='character-mint-button'
+            onClick={mintCharacterNFTAction(index)}
+          >{`Mint ${character.name}`}</button>
         </div>
-        <img src={character.imageURI} alt={character.name} />
-        <button
-          type='button'
-          className='character-mint-button'
-          onClick={mintCharacterNFTAction(index)}
-        >{`Mint ${character.name}`}</button>
-      </div>
-    ))
+      )
+    })
 
   // Generate our gameContract object
   useEffect(() => {
