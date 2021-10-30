@@ -22,15 +22,15 @@ const SelectCharacter = ({ setCharacterNFT }) => {
       if (gameContract) {
         // Show our loading indicator
         setMintingCharacter(true)
-        console.log('Minting character in progress...')
+        // console.log('Minting character in progress...')
         const mintTxn = await gameContract.mintCharacterNFT(characterId)
         await mintTxn.wait()
-        console.log('mintTxn:', mintTxn)
+        // console.log('mintTxn:', mintTxn)
         // Hide our loading indicator when minting is finished
         setMintingCharacter(false)
       }
     } catch (error) {
-      console.warn('MintCharacterAction Error:', error)
+      // console.warn('MintCharacterAction Error:', error)
       alert("Sorry, we've encounted an error. Please refresh the page and try again.")
       // If there is a problem, hide the loading indicator as well
       setMintingCharacter(false)
@@ -40,7 +40,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
   // Render Methods
   const renderCharacters = () =>
     characters.map((character, index) => {
-      console.log(character)
+      // console.log(character)
       return (
         <div className='character-item' key={character.name}>
           <div className='name-container'>
@@ -78,11 +78,11 @@ const SelectCharacter = ({ setCharacterNFT }) => {
   useEffect(() => {
     const getCharacters = async () => {
       try {
-        console.log('Getting contract characters to mint')
+        // console.log('Getting contract characters to mint')
 
         // Call contract to get all mint-able characters
         const charactersTxn = await gameContract.getAllDefaultCharacters()
-        console.log('charactersTxn:', charactersTxn)
+        // console.log('charactersTxn:', charactersTxn)
 
         // Go through all of our characters and transform the data
         const characters = charactersTxn.map((characterData) => transformCharacterData(characterData))
@@ -90,16 +90,17 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         // Set all mint-able characters in state
         setCharacters(characters)
       } catch (error) {
-        console.error('Something went wrong fetching characters:', error)
+        // console.error('Something went wrong fetching characters:', error)
+        alert('Sorry, something went wrong fetching characters. Please refresh the page and try again.')
       }
     }
 
     // Add a callback method that will fire when this event
     // (i.e. when the button to mint an NFT) is received
     const onCharacterMint = async (sender, tokenId, characterIndex) => {
-      console.log(
-        `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
-      )
+      // console.log(
+      //   `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
+      // )
 
       // Once our character NFT is minted we can fetch the metadata from our contract
       // and set it in state to move onto the Arena

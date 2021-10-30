@@ -18,10 +18,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     try {
       if (gameContract) {
         setAttackState('attacking')
-        console.log('Attacking boss...')
+        // console.log('Attacking boss...')
         const attackTxn = await gameContract.attackBoss()
         await attackTxn.wait()
-        console.log('attackTxn:', attackTxn)
+        // console.log('attackTxn:', attackTxn)
         setAttackState('hit')
         // Set your toast state to true and then false 5 seconds later
         setShowToast(true)
@@ -54,7 +54,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     // Setup async function that will get the boss from our contract and set it in state
     const fetchBoss = async () => {
       const bossTxn = await gameContract.getBigBoss()
-      console.log('Boss:', bossTxn)
+      // console.log('Boss:', bossTxn)
       setBoss(transformCharacterData(bossTxn))
     }
 
@@ -63,7 +63,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       const bossHp = newBossHp.toNumber()
       const playerHp = newPlayerHp.toNumber()
 
-      console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`)
+      // console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`)
 
       // Update both player and boss Hp
       setBoss((prevState) => {
@@ -104,7 +104,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           <div className={`boss-content ${attackState}`}>
             <h2>🔥 {boss.name} 🔥</h2>
             <div className='image-content'>
-              < src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`} alt={`Boss ${boss.name}`} />
+              <img src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`} alt={`Boss ${boss.name}`} />
               <div className='health-bar'>
                 <progress value={boss.hp} max={boss.maxHp} />
                 <p>{`${boss.hp} / ${boss.maxHp} HP`}</p>
