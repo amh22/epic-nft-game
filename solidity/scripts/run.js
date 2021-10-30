@@ -15,7 +15,7 @@ const main = async () => {
     50 // Boss attack damage
   )
   await gameContract.deployed()
-  // console.log('Contract deployed to:', gameContract.address)
+  console.log('Contract deployed to:', gameContract.address)
 
   let txn
   // We only have three characters.
