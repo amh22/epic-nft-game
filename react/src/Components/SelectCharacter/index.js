@@ -126,7 +126,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         gameContract.off('CharacterNFTMinted', onCharacterMint)
       }
     }
-  }, [gameContract])
+  }, [gameContract, setCharacterNFT])
 
   return (
     <div className='select-character-container'>
