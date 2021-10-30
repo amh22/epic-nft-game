@@ -79,7 +79,7 @@ contract MyEpicGame is ERC721 {
     // This is the name and symbol for our token, ex Ethereum and ETH. Ours is called
     // Dwight Club and DUND. Remember, an NFT is just a token!
   )
-    ERC721("Dwight Club", "DUND")
+    ERC721("Fight Club Test", "DUND")
   {
     // Initialize the boss. Save it to our global "bigBoss" state variable.
   bigBoss = BigBoss({
