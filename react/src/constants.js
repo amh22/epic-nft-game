@@ -1,4 +1,5 @@
-const CONTRACT_ADDRESS = '0x82aED879A43519414e88d6c692356c4eFeAe66B0'
+const CONTRACT_ADDRESS = '0x267c45e46b7eFDD9c877c00cdBAb59b8897fE62D'
+// const CONTRACT_ADDRESS = '0x82aED879A43519414e88d6c692356c4eFeAe66B0'
 
 const transformCharacterData = (characterData) => {
   return {
@@ -10,4 +11,10 @@ const transformCharacterData = (characterData) => {
   }
 }
 
-export { CONTRACT_ADDRESS, transformCharacterData }
+const transformAllPlayerData = (playerData) => {
+  return {
+    id: playerData.id.toNumber(),
+  }
+}
+
+export { CONTRACT_ADDRESS, transformCharacterData, transformAllPlayerData }
