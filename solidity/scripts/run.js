@@ -23,18 +23,33 @@ const main = async () => {
   txn = await gameContract.mintCharacterNFT(2)
   await txn.wait()
 
-  txn = await gameContract.attackBoss()
+  txn = await gameContract.mintCharacterNFT(1)
   await txn.wait()
 
-  txn = await gameContract.attackBoss()
+  txn = await gameContract.mintCharacterNFT(0)
   await txn.wait()
+
+  // txn = await gameContract.attackBoss()
+  // await txn.wait()
+
+  // txn = await gameContract.attackBoss()
+  // await txn.wait()
 
   // Get the value of the first NFT's URI.
   // Platforms like OpenSea and Rarible know to hit tokenURI
   // since that's the standard way to retrieve the NFTs metadata.
   // * tokenURI actually has a specific format - it expects the NFT data in JSON (Base64 encoded)
   let returnedTokenUri = await gameContract.tokenURI(1)
-  // console.log('Token URI:', returnedTokenUri)
+  console.log('Token URI:', returnedTokenUri)
+
+  let allChars = await gameContract.getAllDefaultCharacters()
+  console.log('All Characters:', allChars)
+
+  let all = await gameContract.getAllPlayers()
+  console.log('All Users:', all)
+
+  let holderAttributes = await gameContract.getUserNFTCharacterAttributes(1)
+  console.log('Holder Attributes:', holderAttributes)
 }
 
 const runMain = async () => {
