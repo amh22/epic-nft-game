@@ -11,8 +11,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
   const [boss, setBoss] = useState(null)
   const [playerCount, setPlayerCount] = useState(0)
-  const [allNFTs, setAllNFTs] = useState({})
-  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNFTs', allNFTs)
+  const [playerId, setPlayerId] = useState([])
+  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ playerId', playerId)
 
   const [attackState, setAttackState] = useState('')
   const [showToast, setShowToast] = useState(false)
@@ -52,6 +52,66 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       console.log('Ethereum object not found')
     }
   }, [])
+
+  // Get Current # of Dwight Club Members
+  useEffect(() => {
+    // const fetchAllNFTMetadata = async () => {
+    //   const players = await gameContract.getAllPlayers()
+
+    //   if (players.length > 0) {
+    //     setPlayerCount(players.length)
+    //   } else {
+    //     console.log('Currently there are no Dwight Club members.')
+    //   }
+    //   // Once we are done with all the fetching, set loading state to false
+    //   // setIsLoading(false)
+    // }
+
+    const fetchAllNFTCharacterAttributes = async () => {
+      const players = await gameContract.getAllPlayers()
+      // console.log('🚀 ~ file: index.js ~ line 73 ~ fetchAllNFTCharacterAttributes ~ players', players)
+
+      players.map((player) => {
+        let playerId = player
+
+        return setPlayerId((prevState) => [...prevState, playerId])
+      })
+
+      // const allCharacters = await gameContract.getUserNFTCharacterAttributes(1)
+      // // console.log('🚀 ~ file: index.js ~ line 73 ~ fetchAllNFTCharacterAttributes ~ allCharacters', allCharacters)
+
+      // if (allCharacters.length > 0) {
+      //   setAllNFTs(allCharacters)
+      // } else {
+      //   console.log('Currently there are no Dwight Club members.')
+      // }
+      // Once we are done with all the fetching, set loading state to false
+      // setIsLoading(false)
+    }
+
+    // Setup logic when this EVENT is fired off
+    const onNFTMint = async (_characterIndex) => {
+      const newCharacterType = _characterIndex.toNumber()
+
+      // console.log(`onNFTMinted: New Character: ${newCharacterType}`)
+
+      const players = await gameContract.getAllPlayers()
+
+      // if (players.length > 0) {
+      //   setPlayerCount(players.length)
+      // } else {
+      //   console.log('Currently there are no Dwight Club members.')
+      // }
+    }
+
+    // We only want to run this, if we have a connected wallet, so:
+    if (gameContract) {
+      // console.log('CurrentAccount:', currentAccount)
+      // fetchAllNFTMetadata()
+      fetchAllNFTCharacterAttributes()
+      gameContract.on('NFTMinted', onNFTMint)
+    }
+  }, [gameContract])
 
   // Get the Boss
   useEffect(() => {
@@ -94,70 +154,70 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   }, [gameContract, setCharacterNFT])
 
   // Get ALL PLAYERS
-  useEffect(() => {
-    const getPlayers = async () => {
-      try {
-        console.log('Getting ALL PLAYERS')
+  // useEffect(() => {
+  //   const getPlayers = async () => {
+  //     try {
+  //       console.log('Getting ALL PLAYERS')
 
-        // Call contract to get all player ID's
-        const players = await gameContract.getAllPlayers()
-        console.log('All Players:', players)
-        console.log('#AllPlayers Length:', players.length)
-        console.log('Player[0]:', players[0].id)
-        console.log('Player[0].toNumber:', players[0].id.toNumber())
+  //       // Call contract to get all player ID's
+  //       const players = await gameContract.getAllPlayers()
+  //       console.log('All Players:', players)
+  //       console.log('#AllPlayers Length:', players.length)
+  //       console.log('Player[0]:', players[0].id)
+  //       console.log('Player[0].toNumber:', players[0].id.toNumber())
 
-        const characters = players.map((playerData) => transformAllPlayerData(playerData))
-        console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ characters', characters)
-        console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ length', characters.length)
-        console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ character[0]', characters[0].id)
+  //       const characters = players.map((playerData) => transformAllPlayerData(playerData))
+  //       console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ characters', characters)
+  //       console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ length', characters.length)
+  //       console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ character[0]', characters[0].id)
 
-        // Get Player NFT attributes
-        let i = 1
-        const playerAttributes = await gameContract.tokenURI(i)
-        const json = atob(playerAttributes.substring(29))
-        const nft = await JSON.parse(json)
-        setAllNFTs((prev) => ({ ...prev, [i.toString()]: nft }))
+  //       // Get Player NFT attributes
+  //       let i = 1
+  //       const playerAttributes = await gameContract.tokenURI(i)
+  //       const json = atob(playerAttributes.substring(29))
+  //       const nft = await JSON.parse(json)
+  //       setAllNFTs((prev) => ({ ...prev, [i.toString()]: nft }))
 
-        // Set Player Count in state
-        setPlayerCount(players)
-      } catch (error) {
-        // console.error('Something went wrong fetching players:', error)
-        alert('Sorry, something went wrong fetching players. Please refresh the page and try again.')
-      }
-    }
+  //       // Set Player Count in state
+  //       setPlayerCount(players)
+  //     } catch (error) {
+  //       // console.error('Something went wrong fetching players:', error)
+  //       alert('Sorry, something went wrong fetching players. Please refresh the page and try again.')
+  //     }
+  //   }
 
-    // Add a callback method that will fire when this event
-    // (i.e. when the button to mint an NFT) is received
-    const onCharacterMint = async (sender, tokenId, characterIndex) => {
-      // console.log(
-      //   `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
-      // )
+  //   // Add a callback method that will fire when this event
+  //   // (i.e. when the button to mint an NFT) is received
+  //   const onCharacterMint = async (sender, tokenId, characterIndex) => {
+  //     // console.log(
+  //     //   `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
+  //     // )
 
-      // Once our character NFT is minted we can fetch the metadata from our contract
-      // and set it in state to move onto the Arena
-      if (gameContract) {
-        const characterNFT = await gameContract.checkIfUserHasNFT()
-        console.log('CharacterNFT: ', characterNFT)
-        setCharacterNFT(transformCharacterData(characterNFT))
-      }
-    }
+  //     // Once our character NFT is minted we can fetch the metadata from our contract
+  //     // and set it in state to move onto the Arena
+  //     if (gameContract) {
+  //       const characterNFT = await gameContract.checkIfUserHasNFT()
+  //       console.log('CharacterNFT: ', characterNFT)
+  //       setCharacterNFT(transformCharacterData(characterNFT))
+  //     }
+  //   }
 
-    // If our gameContract is ready, let's get characters!
-    if (gameContract) {
-      getPlayers()
-      // The Listener
-      // Use our gameContract object to listen for the 'CharacterNFTMinted' fired from our smart contact
-      // when it is fired, we run the 'onCharacterMint' logic
-      gameContract.on('CharacterNFTMinted', onCharacterMint)
-    }
+  //   // If our gameContract is ready, let's get characters!
+  //   if (gameContract) {
+  //     getPlayers()
+  //     // The Listener
+  //     // Use our gameContract object to listen for the 'CharacterNFTMinted' fired from our smart contact
+  //     // when it is fired, we run the 'onCharacterMint' logic
+  //     gameContract.on('CharacterNFTMinted', onCharacterMint)
+  //   }
 
-    return () => {
-      // When your component unmounts, let's make sure to clean up this listener
-      if (gameContract) {
-        gameContract.off('CharacterNFTMinted', onCharacterMint)
-      }
-    }
-  }, [gameContract, setCharacterNFT])
+  //   return () => {
+  //     // When your component unmounts, let's make sure to clean up this listener
+  //     if (gameContract) {
+  //       gameContract.off('CharacterNFTMinted', onCharacterMint)
+  //     }
+  //   }
+  // }, [gameContract, setCharacterNFT])
 
   return (
     <div className='arena-container'>
@@ -171,7 +231,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       {/* The BOSS */}
       {boss && (
         <Fragment>
-          <p>{playerCount.length}</p>
+          {/* {gameContract && <p className='sub-text'>Dwight Club Members: {playerCount}</p>} */}
           <div className='boss-container'>
             <div className={`boss-content ${attackState}`}>
               <h2>🔥 {boss.name} 🔥</h2>
