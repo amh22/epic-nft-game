@@ -20,14 +20,14 @@ const main = async () => {
   let txn
   // We only have three characters.
   // Let's mint an NFT w/ the character at index 2 of our array.
-  txn = await gameContract.mintCharacterNFT(2)
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(2)
+  // await txn.wait()
 
-  txn = await gameContract.mintCharacterNFT(1)
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(1)
+  // await txn.wait()
 
-  txn = await gameContract.mintCharacterNFT(0)
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(0)
+  // await txn.wait()
 
   // txn = await gameContract.attackBoss()
   // await txn.wait()
@@ -48,8 +48,8 @@ const main = async () => {
   let all = await gameContract.getAllPlayers()
   console.log('All Users:', all)
 
-  let holderAttributes = await gameContract.getUserNFTCharacterAttributes(1)
-  console.log('Holder Attributes:', holderAttributes)
+  // let holderAttributes = await gameContract.getUserNFTCharacterAttributes(1)
+  // console.log('Holder Attributes:', holderAttributes)
 }
 
 const runMain = async () => {
