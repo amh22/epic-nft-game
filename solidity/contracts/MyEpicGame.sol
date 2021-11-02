@@ -78,11 +78,18 @@ contract MyEpicGame is ERC721 {
   AllPlayers[] gameUsers;
 
 
-  // Let user know that the mint was successful
-  // It fires when we finish minting the NFT
+  /* ---------- OUR EVENTS ---------- */
+  // We need to tell Solidity the format of our events before we start firing them
+
+  // On Successful Mint - it fires when we finish minting the NFT
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
-  // Let the user know the attack on the boss has been completed
+
+  // On Successful Attack - on the boss
   event AttackComplete(uint newBossHp, uint newPlayerHp);
+
+  // When a new NFT has been minted (by anyone)
+  event NFTMinted(uint256 characterIndex);
+
 
   // We pass Data into the contract when it's first created to initialize the characters.
   // We pass these values in from from run.js or deploy.js.
@@ -222,8 +229,13 @@ contract MyEpicGame is ERC721 {
     // Increment the tokenId for the next person that uses it.
     _tokenIds.increment();
 
-    // Fires off the event so we can notify the user of a successful mint (not 'mine')
+    /* ---- Fire Off EVENTS ---- */
+
+    // notify the user of a successful mint (not 'mine')
     emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
+
+    // notify the frontend when a new Dwight Club member has joined
+    emit NFTMinted(_characterIndex);
   }
 
   // Platforms like OpenSea and Rarible know to hit tokenURI (i.e. they call it)
