@@ -18,6 +18,7 @@ const App = () => {
 
   const [characterNFT, setCharacterNFT] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [playerCount, setPlayerCount] = useState(0)
 
   // We run this on component load
   const checkIfWalletIsConnected = async () => {
@@ -107,10 +108,52 @@ const App = () => {
 
   // This runs our function when the page loads.
   useEffect(() => {
-    // Anytime our component mounts, make sure to immiediately set our loading state
+    // Anytime our component mounts, make sure to immediately set our loading state
     setIsLoading(true)
     checkIfWalletIsConnected()
   }, [])
+
+  // Get Current # of Dwight Club Members
+  useEffect(() => {
+    const fetchNFTMetadata = async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const gameContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicGame.abi, signer)
+
+      const players = await gameContract.getAllPlayers()
+      console.log('All Players:', players)
+      console.log('#AllPlayers Length:', players.length)
+
+      if (players.length > 0) {
+        // console.log('TXN:', txn)
+        // console.log('User has character NFT')
+        setPlayerCount(players.length)
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
+
+      // NOW CONNECT TO THE BLOCKCHAIN! COOL!
+      // and check to see if the user has an character already
+      // by checking for the 'name'
+      const txn = await gameContract.checkIfUserHasNFT()
+      if (txn.name) {
+        // console.log('TXN:', txn)
+        // console.log('User has character NFT')
+        setCharacterNFT(transformCharacterData(txn))
+      } else {
+        console.log('No character NFT found')
+      }
+
+      // Once we are done with all the fetching, set loading state to false
+      setIsLoading(false)
+    }
+
+    // We only want to run this, if we have a connected wallet, so:
+    if (currentAccount) {
+      // console.log('CurrentAccount:', currentAccount)
+      fetchNFTMetadata()
+    }
+  }, [currentAccount])
 
   // If a user's wallet is connected, then
   // check to see if the user ALREADY has minted a character
@@ -153,6 +196,7 @@ const App = () => {
         <div className='header-container'>
           <p className='header gradient-text'>⚔️ Dwight Club ⚔️</p>
           <p className='sub-text'>The first rule of Dwight Club is: you do not talk about Dwight Club!</p>
+          <p className='sub-text'>Dwight Club Members: {playerCount}</p>
 
           {renderContent()}
         </div>
