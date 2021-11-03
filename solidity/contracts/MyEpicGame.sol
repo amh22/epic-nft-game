@@ -172,6 +172,21 @@ contract MyEpicGame is ERC721 {
       }
     }
 
+    /* ------ CALLED FROM THE FRONTEND to GET ALL NFT HOLDER DETAILS ------------- */
+  function getNFTHolder(address sender) public view returns (CharacterAttributes memory) {
+    // Get the tokenId of the user's character NFT
+    uint256 userNftTokenId = nftHolders[sender];
+    // If the user has a tokenId in the map, return their character.
+    if (userNftTokenId > 0) {
+      return nftHolderAttributes[userNftTokenId];
+    }
+    // Else, return an empty character.
+    else {
+      CharacterAttributes memory emptyStruct;
+      return emptyStruct;
+    }
+  }
+
 
 
   function getAllDefaultCharacters() public view returns (CharacterAttributes[] memory) {
@@ -185,6 +200,7 @@ contract MyEpicGame is ERC721 {
   function getAllPlayers() public view returns (AllPlayers[] memory) {
     return gameUsers;
   }
+
 
 
 
@@ -220,7 +236,7 @@ contract MyEpicGame is ERC721 {
         wallet: msg.sender
       }));
 
-    console.log("Pushed new player to gameUsers array w/ tokenId %s", newItemId);
+    console.log("Pushed new player to gameUsers array w/ tokenId %s and wallet %s", newItemId, msg.sender);
 
 
     // Keep an easy way to see who owns what NFT.

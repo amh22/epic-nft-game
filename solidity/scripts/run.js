@@ -48,8 +48,11 @@ const main = async () => {
   let all = await gameContract.getAllPlayers()
   console.log('All Users:', all)
 
-  // let holderAttributes = await gameContract.getUserNFTCharacterAttributes(1)
-  // console.log('Holder Attributes:', holderAttributes)
+  let holders = await gameContract.getNFTHolder('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266')
+  console.log('All Holders:', holders)
+
+  let holderAttributes = await gameContract.getUserNFTCharacterAttributes(1)
+  console.log('Holder Attributes:', holderAttributes)
 }
 
 const runMain = async () => {
