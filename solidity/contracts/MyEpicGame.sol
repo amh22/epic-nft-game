@@ -86,7 +86,7 @@ contract MyEpicGame is ERC721 {
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
 
   // On Successful Attack - on the boss
-  event AttackComplete(uint newBossHp, uint newPlayerHp);
+  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted);
 
   // When a new NFT has been minted (by anyone)
   event NFTMinted(uint256 characterIndex);
@@ -299,6 +299,7 @@ contract MyEpicGame is ERC721 {
     uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
     CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
     console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
+    console.log("Damage Inflicted", player.damageInflicted);
     console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
 
     // Make sure the player has more than 0 HP.
@@ -318,6 +319,7 @@ contract MyEpicGame is ERC721 {
       bigBoss.hp = 0;
     } else {
       bigBoss.hp = bigBoss.hp - player.attackDamage;
+      player.damageInflicted = player.damageInflicted + player.attackDamage;
     }
 
     // Allow boss to attack player.
@@ -329,11 +331,11 @@ contract MyEpicGame is ERC721 {
 
     // Fires off the event which we can use in our frontend to dynamically update
     // the HP UI
-    emit AttackComplete(bigBoss.hp, player.hp);
+    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted);
 
     // Console for ease.
     console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
-    console.log("Boss attacked player. New player hp: %s\n", player.hp);
+    console.log("Boss attacked player. New player hp: %s\n", player.hp, player.damageInflicted);
   }
 
 }
