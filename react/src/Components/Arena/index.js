@@ -144,9 +144,17 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       gameContract.on('CharacterNFTMinted', onCharacterMint)
       gameContract.on('AttackComplete', onAttackComplete)
     }
+
+    // Make sure to clean up the events when this component is removed
+    return () => {
+      if (gameContract) {
+        gameContract.on('CharacterNFTMinted', onCharacterMint)
+        gameContract.off('AttackComplete', onAttackComplete)
+      }
+    }
   }, [gameContract])
 
-  /* -------- GET THE BOSS --------- */
+  /* -------- GET THE BOSS & HANDLED ATTACKS --------- */
   useEffect(() => {
     // Setup async function that will get the boss from our contract and set it in state
     const fetchBoss = async () => {
@@ -156,9 +164,11 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
 
     // Setup logic when this event is fired off
-    const onAttackComplete = (newBossHp, newPlayerHp) => {
+    const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted) => {
       const bossHp = newBossHp.toNumber()
       const playerHp = newPlayerHp.toNumber()
+      const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
+      console.log('🚀 ~ file: index.js ~ line 171 ~ onAttackComplete ~ playerDmgInflicted', playerDmgInflicted)
 
       // console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`)
 
@@ -168,7 +178,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       })
 
       setCharacterNFT((prevState) => {
-        return { ...prevState, hp: playerHp }
+        return { ...prevState, hp: playerHp, damageInflicted: playerDmgInflicted }
       })
     }
 
