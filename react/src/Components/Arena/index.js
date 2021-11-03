@@ -10,9 +10,11 @@ import LoadingIndicator from '../LoadingIndicator'
 const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
   const [boss, setBoss] = useState(null)
-  const [playerCount, setPlayerCount] = useState(0)
-  const [playerId, setPlayerId] = useState([])
-  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ playerId', playerId)
+  // const [playerIds, setPlayerIDs] = useState([])
+  const [allNftAttributes, setAllNftAttributes] = useState({})
+  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftAttributes', allNftAttributes)
+  // console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftAttributes[1]', allNftAttributes[1])
+  // console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftAttributes[1].name', allNftAttributes[1].name)
 
   const [attackState, setAttackState] = useState('')
   const [showToast, setShowToast] = useState(false)
@@ -53,41 +55,65 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   }, [])
 
-  // Get Current # of Dwight Club Members
+  // Get Current # of and ID's of Dwight Club Members
   useEffect(() => {
-    // const fetchAllNFTMetadata = async () => {
-    //   const players = await gameContract.getAllPlayers()
-
-    //   if (players.length > 0) {
-    //     setPlayerCount(players.length)
-    //   } else {
-    //     console.log('Currently there are no Dwight Club members.')
-    //   }
-    //   // Once we are done with all the fetching, set loading state to false
-    //   // setIsLoading(false)
-    // }
-
-    const fetchAllNFTCharacterAttributes = async () => {
+    const fetchAllNFTs = async () => {
       const players = await gameContract.getAllPlayers()
-      // console.log('🚀 ~ file: index.js ~ line 73 ~ fetchAllNFTCharacterAttributes ~ players', players)
+      console.log('🚀 ~ file: index.js ~ line 62 ~ fetchAllNFTs ~ players', players)
 
-      players.map((player) => {
-        let playerId = player
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet
+          const nftAttributes = await gameContract.tokenURI(playerID)
+          const json = atob(nftAttributes.substring(29))
+          const nft = await JSON.parse(json)
+          // const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          nft.wallet = playerWallet
+          return setAllNftAttributes((prevState) => ({ ...prevState, [playerID.toString()]: nft }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
 
-        return setPlayerId((prevState) => [...prevState, playerId])
-      })
+      // try {
+      //   // const players = await gameContract.getAllPlayers()
+      //   // console.log('🚀 ~ file: index.js ~ line 62 ~ fetchAllNFTs ~ players', players)
 
-      // const allCharacters = await gameContract.getUserNFTCharacterAttributes(1)
-      // // console.log('🚀 ~ file: index.js ~ line 73 ~ fetchAllNFTCharacterAttributes ~ allCharacters', allCharacters)
+      //   const numberOfPlayers = players.length
 
-      // if (allCharacters.length > 0) {
-      //   setAllNFTs(allCharacters)
-      // } else {
-      //   console.log('Currently there are no Dwight Club members.')
+      //   for (let i = 1; i < numberOfPlayers + 1; i++) {
+      //     const txn = await gameContract.tokenURI(i)
+      //     const json = atob(txn.substring(29))
+      //     const nft = await JSON.parse(json)
+      //     nft.wallet = 'poop'
+      //     setAllNftAttributes((prev) => ({ ...prev, [i.toString()]: nft }))
+      //   }
+      // } catch (error) {
+      //   console.log(error)
       // }
+
       // Once we are done with all the fetching, set loading state to false
       // setIsLoading(false)
     }
+
+    // const fetchAllNFTCharacterAttributes = async () => {
+    //   console.log('Fetch All NFT attributes')
+
+    //   try {
+
+    //   }
+
+    //   playerIds.map((item) => {
+    //     let itemId = item.id
+    //     itemId.toNumber()
+    //     const allCharacters = await gameContract.getUserNFTCharacterAttributes()
+    //     return setPlayerIDs((prevState) => [...prevState, playerIds])
+    //   })
+
+    //   // Once we are done with all the fetching, set loading state to false
+    //   // setIsLoading(false)
+    // }
 
     // Setup logic when this EVENT is fired off
     const onNFTMint = async (_characterIndex) => {
@@ -107,8 +133,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     // We only want to run this, if we have a connected wallet, so:
     if (gameContract) {
       // console.log('CurrentAccount:', currentAccount)
-      // fetchAllNFTMetadata()
-      fetchAllNFTCharacterAttributes()
+      fetchAllNFTs()
+      // fetchAllNFTCharacterAttributes()
       gameContract.on('NFTMinted', onNFTMint)
     }
   }, [gameContract])
