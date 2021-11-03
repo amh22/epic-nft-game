@@ -187,8 +187,6 @@ contract MyEpicGame is ERC721 {
     }
   }
 
-
-
   function getAllDefaultCharacters() public view returns (CharacterAttributes[] memory) {
     return defaultCharacters;
   }
@@ -206,6 +204,7 @@ contract MyEpicGame is ERC721 {
 
 
   /*  ********** NFT MINTING ********** */
+
   // Generates an NFT based on the characterId (i.e. _characterIndex) passed into the contract at time of mint!
   function mintCharacterNFT(uint _characterIndex) external {
 
@@ -289,6 +288,7 @@ contract MyEpicGame is ERC721 {
   }
 
 
+  /* --------- ATTACK BOSS ---------- */
 
   function attackBoss() public {
     // Get the state of the player's NFT.
