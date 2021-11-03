@@ -28,6 +28,7 @@ contract MyEpicGame is ERC721 {
     uint hp;
     uint maxHp;
     uint attackDamage;
+    uint damageInflicted;
   }
 
   // Declare an ARRAY called 'defaultCharacters' based on the 'CharacterAttributes' struct
@@ -98,6 +99,7 @@ contract MyEpicGame is ERC721 {
     string[] memory characterImageURIs,
     uint[] memory characterHp,
     uint[] memory characterAttackDmg,
+    uint[] memory characterDmgInflicted,
     string memory bossName, // These new variables would be passed in via run.js or deploy.js.
     string memory bossImageURI,
     uint bossHp,
@@ -128,7 +130,8 @@ contract MyEpicGame is ERC721 {
         imageURI: characterImageURIs[i],
         hp: characterHp[i],
         maxHp: characterHp[i],
-        attackDamage: characterAttackDmg[i]
+        attackDamage: characterAttackDmg[i],
+        damageInflicted: characterDmgInflicted[i]
       }));
 
       CharacterAttributes memory c = defaultCharacters[i];
@@ -222,7 +225,8 @@ contract MyEpicGame is ERC721 {
       imageURI: defaultCharacters[_characterIndex].imageURI,
       hp: defaultCharacters[_characterIndex].hp,
       maxHp: defaultCharacters[_characterIndex].hp,
-      attackDamage: defaultCharacters[_characterIndex].attackDamage
+      attackDamage: defaultCharacters[_characterIndex].attackDamage,
+      damageInflicted: defaultCharacters[_characterIndex].damageInflicted
     });
 
     console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
@@ -260,6 +264,7 @@ contract MyEpicGame is ERC721 {
     string memory strHp = Strings.toString(charAttributes.hp);
     string memory strMaxHp = Strings.toString(charAttributes.maxHp);
     string memory strAttackDamage = Strings.toString(charAttributes.attackDamage);
+    string memory strDamageInflicted = Strings.toString(charAttributes.damageInflicted);
 
     string memory json = Base64.encode(
       bytes(
@@ -272,7 +277,8 @@ contract MyEpicGame is ERC721 {
             '", "description": "This is an NFT that gives you entry to the Dwight Club game!", "image": "ipfs://',
             charAttributes.imageURI,
             '", "attributes": [ { "trait_type": "Health Points", "value": ',strHp,', "max_value":',strMaxHp,'}, { "trait_type": "Attack Damage", "value": ',
-            strAttackDamage,'} ]}'
+            strAttackDamage,'}, { "trait_type": "Damage Inflicted", "value": ',
+            strDamageInflicted,'} ]}'
           )
         )
       )

@@ -9,6 +9,7 @@ const main = async () => {
     ],
     [500, 350, 200], // HP values
     [100, 50, 25], // Attack damage values
+    [0, 0, 0], // Damage inflicted values
     'Dwight Schrute', // Boss name
     'Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q', // Boss image
     10000, // Boss hp
@@ -20,14 +21,17 @@ const main = async () => {
   let txn
   // We only have three characters.
   // Let's mint an NFT w/ the character at index 2 of our array.
-  txn = await gameContract.mintCharacterNFT(2)
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(2)
+  // await txn.wait()
 
-  txn = await gameContract.mintCharacterNFT(1)
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(1)
+  // await txn.wait()
 
-  txn = await gameContract.mintCharacterNFT(0)
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(0)
+  // await txn.wait()
+
+  // txn = await gameContract.mintCharacterNFT(0)
+  // await txn.wait()
 
   // txn = await gameContract.attackBoss()
   // await txn.wait()
