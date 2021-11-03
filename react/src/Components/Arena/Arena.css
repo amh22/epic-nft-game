@@ -230,6 +230,7 @@
   align-items: center;
   background-color: #ff8177;
   border: 1px solid red;
+  padding: 10px 20px 20px 20px;
 }
 
 .bout-stats-data {

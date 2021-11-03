@@ -17,7 +17,6 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null)
 
   const [characterNFT, setCharacterNFT] = useState(null)
-  console.log('🚀 ~ file: App.js ~ line 20 ~ App ~ characterNFT', characterNFT)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -78,7 +77,7 @@ const App = () => {
 
       // If there is a connected wallet AND characterNFT, it's time to battle!
     } else if (currentAccount && characterNFT) {
-      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} />
+      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} curentAccount={currentAccount} />
     }
   }
 

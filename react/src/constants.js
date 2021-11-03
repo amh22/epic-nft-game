@@ -12,10 +12,4 @@ const transformCharacterData = (characterData) => {
   }
 }
 
-const transformAllPlayerData = (playerData) => {
-  return {
-    id: playerData.id.toNumber(),
-  }
-}
-
-export { CONTRACT_ADDRESS, transformCharacterData, transformAllPlayerData }
+export { CONTRACT_ADDRESS, transformCharacterData }
