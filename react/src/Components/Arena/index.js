@@ -11,10 +11,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
   const [boss, setBoss] = useState(null)
   // const [playerIds, setPlayerIDs] = useState([])
-  const [allNftAttributes, setAllNftAttributes] = useState({})
-  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftAttributes', allNftAttributes)
-  // console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftAttributes[1]', allNftAttributes[1])
-  // console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftAttributes[1].name', allNftAttributes[1].name)
+  const [allNftMetadata, setAllNftMetadata] = useState({})
+  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftMetadata', allNftMetadata)
+  // console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftMetadata[1]', allNftMetadata[1])
+  // console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ allNftMetadata[1].name', allNftMetadata[1].name)
 
   const [attackState, setAttackState] = useState('')
   const [showToast, setShowToast] = useState(false)
@@ -55,91 +55,60 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   }, [])
 
-  // Get Current # of and ID's of Dwight Club Members
+  // Get ALL Dwight Club Members Data
   useEffect(() => {
-    const fetchAllNFTs = async () => {
-      const players = await gameContract.getAllPlayers()
-      console.log('🚀 ~ file: index.js ~ line 62 ~ fetchAllNFTs ~ players', players)
+    const fetchAllNFTMetadata = async () => {
+      // console.log('Checking for ALL NFT metadata)
+      const players = await gameContract.getAllPlayers() // switch this for another counter????
+      // console.log('🚀 ~ file: index.js ~ line 62 ~ fetchAllNFTMetadata ~ players', players)
 
       if (players.length > 0) {
         players.map(async (player) => {
           let playerID = player.id
           let playerWallet = player.wallet
-          const nftAttributes = await gameContract.tokenURI(playerID)
-          const json = atob(nftAttributes.substring(29))
-          const nft = await JSON.parse(json)
-          // const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-          nft.wallet = playerWallet
-          return setAllNftAttributes((prevState) => ({ ...prevState, [playerID.toString()]: nft }))
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          const metadata = transformCharacterData(nftAttributes)
+          console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
+          metadata['wallet'] = playerWallet
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
       } else {
         console.log('Currently there are no Dwight Club members.')
       }
 
-      // try {
-      //   // const players = await gameContract.getAllPlayers()
-      //   // console.log('🚀 ~ file: index.js ~ line 62 ~ fetchAllNFTs ~ players', players)
-
-      //   const numberOfPlayers = players.length
-
-      //   for (let i = 1; i < numberOfPlayers + 1; i++) {
-      //     const txn = await gameContract.tokenURI(i)
-      //     const json = atob(txn.substring(29))
-      //     const nft = await JSON.parse(json)
-      //     nft.wallet = 'poop'
-      //     setAllNftAttributes((prev) => ({ ...prev, [i.toString()]: nft }))
-      //   }
-      // } catch (error) {
-      //   console.log(error)
-      // }
-
       // Once we are done with all the fetching, set loading state to false
       // setIsLoading(false)
     }
 
-    // const fetchAllNFTCharacterAttributes = async () => {
-    //   console.log('Fetch All NFT attributes')
-
-    //   try {
-
-    //   }
-
-    //   playerIds.map((item) => {
-    //     let itemId = item.id
-    //     itemId.toNumber()
-    //     const allCharacters = await gameContract.getUserNFTCharacterAttributes()
-    //     return setPlayerIDs((prevState) => [...prevState, playerIds])
-    //   })
-
-    //   // Once we are done with all the fetching, set loading state to false
-    //   // setIsLoading(false)
-    // }
-
     // Setup logic when this EVENT is fired off
-    const onNFTMint = async (_characterIndex) => {
-      const newCharacterType = _characterIndex.toNumber()
+    const onCharacterMint = async (sender, tokenId, characterIndex) => {
+      const players = await gameContract.getAllPlayers() // switch this for another counter????
 
-      // console.log(`onNFTMinted: New Character: ${newCharacterType}`)
-
-      const players = await gameContract.getAllPlayers()
-
-      // if (players.length > 0) {
-      //   setPlayerCount(players.length)
-      // } else {
-      //   console.log('Currently there are no Dwight Club members.')
-      // }
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          const metadata = transformCharacterData(nftAttributes)
+          console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
+          metadata['wallet'] = playerWallet
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
     }
 
-    // We only want to run this, if we have a connected wallet, so:
+    // If our gameContract is ready, let's get ALL metadata!
     if (gameContract) {
-      // console.log('CurrentAccount:', currentAccount)
-      fetchAllNFTs()
-      // fetchAllNFTCharacterAttributes()
-      gameContract.on('NFTMinted', onNFTMint)
+      fetchAllNFTMetadata()
+      // Listen to our contract on chain for when a new NFT is minted
+      // gameContract.on('NFTMinted', onNFTMint)
+      gameContract.on('CharacterNFTMinted', onCharacterMint)
     }
   }, [gameContract])
 
-  // Get the Boss
+  /* -------- GET THE BOSS --------- */
   useEffect(() => {
     // Setup async function that will get the boss from our contract and set it in state
     const fetchBoss = async () => {
@@ -179,136 +148,113 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   }, [gameContract, setCharacterNFT])
 
-  // Get ALL PLAYERS
-  // useEffect(() => {
-  //   const getPlayers = async () => {
-  //     try {
-  //       console.log('Getting ALL PLAYERS')
-
-  //       // Call contract to get all player ID's
-  //       const players = await gameContract.getAllPlayers()
-  //       console.log('All Players:', players)
-  //       console.log('#AllPlayers Length:', players.length)
-  //       console.log('Player[0]:', players[0].id)
-  //       console.log('Player[0].toNumber:', players[0].id.toNumber())
-
-  //       const characters = players.map((playerData) => transformAllPlayerData(playerData))
-  //       console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ characters', characters)
-  //       console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ length', characters.length)
-  //       console.log('🚀 ~ file: index.js ~ line 106 ~ getPlayers ~ character[0]', characters[0].id)
-
-  //       // Get Player NFT attributes
-  //       let i = 1
-  //       const playerAttributes = await gameContract.tokenURI(i)
-  //       const json = atob(playerAttributes.substring(29))
-  //       const nft = await JSON.parse(json)
-  //       setAllNFTs((prev) => ({ ...prev, [i.toString()]: nft }))
-
-  //       // Set Player Count in state
-  //       setPlayerCount(players)
-  //     } catch (error) {
-  //       // console.error('Something went wrong fetching players:', error)
-  //       alert('Sorry, something went wrong fetching players. Please refresh the page and try again.')
-  //     }
-  //   }
-
-  //   // Add a callback method that will fire when this event
-  //   // (i.e. when the button to mint an NFT) is received
-  //   const onCharacterMint = async (sender, tokenId, characterIndex) => {
-  //     // console.log(
-  //     //   `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
-  //     // )
-
-  //     // Once our character NFT is minted we can fetch the metadata from our contract
-  //     // and set it in state to move onto the Arena
-  //     if (gameContract) {
-  //       const characterNFT = await gameContract.checkIfUserHasNFT()
-  //       console.log('CharacterNFT: ', characterNFT)
-  //       setCharacterNFT(transformCharacterData(characterNFT))
-  //     }
-  //   }
-
-  //   // If our gameContract is ready, let's get characters!
-  //   if (gameContract) {
-  //     getPlayers()
-  //     // The Listener
-  //     // Use our gameContract object to listen for the 'CharacterNFTMinted' fired from our smart contact
-  //     // when it is fired, we run the 'onCharacterMint' logic
-  //     gameContract.on('CharacterNFTMinted', onCharacterMint)
-  //   }
-
-  //   return () => {
-  //     // When your component unmounts, let's make sure to clean up this listener
-  //     if (gameContract) {
-  //       gameContract.off('CharacterNFTMinted', onCharacterMint)
-  //     }
-  //   }
-  // }, [gameContract, setCharacterNFT])
-
   return (
-    <div className='arena-container'>
-      {/* Add your toast HTML right here */}
-      {boss && showToast && (
-        <div id='toast' className='show'>
-          <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
-        </div>
-      )}
+    <Fragment>
+      <div className='arena-container'>
+        {/* Add your toast HTML right here */}
+        {boss && showToast && (
+          <div id='toast' className='show'>
+            <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+          </div>
+        )}
 
-      {/* The BOSS */}
-      {boss && (
-        <Fragment>
-          {/* {gameContract && <p className='sub-text'>Dwight Club Members: {playerCount}</p>} */}
-          <div className='boss-container'>
-            <div className={`boss-content ${attackState}`}>
-              <h2>🔥 {boss.name} 🔥</h2>
-              <div className='image-content'>
-                <img src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`} alt={`Boss ${boss.name}`} />
-                <div className='health-bar'>
-                  <progress value={boss.hp} max={boss.maxHp} />
-                  <p>{`${boss.hp} / ${boss.maxHp} HP`}</p>
+        {/* The BOSS */}
+        {boss && (
+          <Fragment>
+            {/* {gameContract && <p className='sub-text'>Dwight Club Members: {playerCount}</p>} */}
+            <div className='boss-container'>
+              <div className={`boss-content ${attackState}`}>
+                <h2>🔥 {boss.name} 🔥</h2>
+                <div className='image-content'>
+                  <img src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`} alt={`Boss ${boss.name}`} />
+                  <div className='health-bar'>
+                    <progress value={boss.hp} max={boss.maxHp} />
+                    <p>{`${boss.hp} / ${boss.maxHp} HP`}</p>
+                  </div>
                 </div>
               </div>
+              <div className='attack-container'>
+                <button className='cta-button' onClick={runAttackAction}>
+                  {`💥 Attack ${boss.name}`}
+                </button>
+                {attackState === 'attacking' && (
+                  <div className='loading-indicator'>
+                    <LoadingIndicator />
+                    <p>Attacking ⚔️</p>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className='attack-container'>
-              <button className='cta-button' onClick={runAttackAction}>
-                {`💥 Attack ${boss.name}`}
-              </button>
-              {attackState === 'attacking' && (
-                <div className='loading-indicator'>
-                  <LoadingIndicator />
-                  <p>Attacking ⚔️</p>
+          </Fragment>
+        )}
+
+        {/* Character NFT */}
+        {characterNFT && (
+          <div className='players-container'>
+            <div className='player-container'>
+              <h2>Your Character</h2>
+              <div className='player'>
+                <div className='image-content'>
+                  <h2>{characterNFT.name}</h2>
+                  <img
+                    src={`https://cloudflare-ipfs.com/ipfs/${characterNFT.imageURI}`}
+                    alt={`Character ${characterNFT.name}`}
+                  />
+                  <div className='health-bar'>
+                    <progress value={characterNFT.hp} max={characterNFT.maxHp} />
+                    <p>{`${characterNFT.hp} / ${characterNFT.maxHp} HP`}</p>
+                  </div>
                 </div>
-              )}
+                <div className='stats'>
+                  <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
+                </div>
+              </div>
             </div>
           </div>
-        </Fragment>
-      )}
-
-      {/* Character NFT */}
-      {characterNFT && (
-        <div className='players-container'>
-          <div className='player-container'>
-            <h2>Your Character</h2>
-            <div className='player'>
-              <div className='image-content'>
-                <h2>{characterNFT.name}</h2>
-                <img
-                  src={`https://cloudflare-ipfs.com/ipfs/${characterNFT.imageURI}`}
-                  alt={`Character ${characterNFT.name}`}
-                />
-                <div className='health-bar'>
-                  <progress value={characterNFT.hp} max={characterNFT.maxHp} />
-                  <p>{`${characterNFT.hp} / ${characterNFT.maxHp} HP`}</p>
-                </div>
-              </div>
-              <div className='stats'>
-                <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
-              </div>
-            </div>
+        )}
+      </div>
+      <div className='arena-container'>
+        <div className='bout-stats'>
+          <div>
+            <h2>Bout Stats</h2>
+          </div>
+          <div className='bout-stats-data'>
+            <table>
+              <tr
+                style={{
+                  height: '60px',
+                  border: '1px solid green',
+                }}
+              >
+                <th>Character</th>
+                <th>Owner</th>
+                <th>HP</th>
+                <th>Damage Dealt</th>
+              </tr>
+              {Object.keys(allNftMetadata).map((id, i) => (
+                <tr
+                  style={{
+                    height: '60px',
+                    border: '1px solid green',
+                  }}
+                >
+                  <td>
+                    <img
+                      className='bout-stats-image'
+                      src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
+                      alt={`Character ${allNftMetadata[id].name}`}
+                    />
+                  </td>
+                  <td>{allNftMetadata[id].wallet}</td>
+                  <td>{allNftMetadata[id].hp}</td>
+                  <td>{allNftMetadata[id].hp}</td>
+                </tr>
+              ))}
+            </table>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </Fragment>
   )
 }
 

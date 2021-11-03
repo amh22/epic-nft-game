@@ -17,6 +17,8 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null)
 
   const [characterNFT, setCharacterNFT] = useState(null)
+  console.log('🚀 ~ file: App.js ~ line 20 ~ App ~ characterNFT', characterNFT)
+
   const [isLoading, setIsLoading] = useState(false)
 
   // We run this on component load

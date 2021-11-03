@@ -221,6 +221,32 @@
   }
 }
 
+/* Leader Board */
+.bout-stats {
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ff8177;
+  border: 1px solid red;
+}
+
+.bout-stats-data {
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bout-stats-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid blue;
+}
+
 /* Toast */
 #toast {
   visibility: hidden;
