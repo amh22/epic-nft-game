@@ -16,8 +16,6 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
   const [mintingCharacter, setMintingCharacter] = useState(false)
 
-  const [playerCount, setPlayerCount] = useState(0)
-
   // Actions
   const mintCharacterNFTAction = (characterId) => async () => {
     try {
@@ -130,47 +128,8 @@ const SelectCharacter = ({ setCharacterNFT }) => {
     }
   }, [gameContract, setCharacterNFT])
 
-  // Get Current # of Dwight Club Members
-  // useEffect(() => {
-  //   const fetchAllNFTMetadata = async () => {
-  //     const players = await gameContract.getAllPlayers()
-
-  //     if (players.length > 0) {
-  //       setPlayerCount(players.length)
-  //     } else {
-  //       console.log('Currently there are no Dwight Club members.')
-  //     }
-
-  //     // Once we are done with all the fetching, set loading state to false
-  //     // setIsLoading(false)
-  //   }
-
-  //   // Setup logic when this EVENT is fired off
-  //   const onNFTMint = async (_characterIndex) => {
-  //     const newCharacterType = _characterIndex.toNumber()
-
-  //     // console.log(`onNFTMinted: New Character: ${newCharacterType}`)
-
-  //     const players = await gameContract.getAllPlayers()
-
-  //     if (players.length > 0) {
-  //       setPlayerCount(players.length)
-  //     } else {
-  //       console.log('Currently there are no Dwight Club members.')
-  //     }
-  //   }
-
-  //   // We only want to run this, if we have a connected wallet, so:
-  //   if (gameContract) {
-  //     // console.log('CurrentAccount:', currentAccount)
-  //     fetchAllNFTMetadata()
-  //     gameContract.on('NFTMinted', onNFTMint)
-  //   }
-  // }, [gameContract])
-
   return (
     <div className='select-character-container'>
-      {gameContract && <p className='sub-text'>Dwight Club Members: {playerCount}</p>}
       <h2>Mint Your Hero. Choose wisely.</h2>
       {/* Only show this when there are characters in state */}
       {characters.length > 0 && <div className='character-grid'>{renderCharacters()}</div>}

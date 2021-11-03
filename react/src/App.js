@@ -129,6 +129,7 @@ const App = () => {
       // and check to see if the user has an character already
       // by checking for the 'name'
       const txn = await gameContract.checkIfUserHasNFT()
+
       if (txn.name) {
         // console.log('TXN:', txn)
         // console.log('User has character NFT')

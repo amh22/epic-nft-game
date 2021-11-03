@@ -1,11 +1,9 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants'
+import { CONTRACT_ADDRESS, transformCharacterData, transformBossData } from '../../constants'
 import myEpicGame from '../../utils/MyEpicGame.json'
 import './Arena.css'
 import LoadingIndicator from '../LoadingIndicator'
-
-// We pass in our characterNFT metadata so we can show a cool card in our UI
 
 const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
@@ -87,8 +85,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           let playerID = player.id
           let playerWallet = player.wallet
           const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          console.log('🚀 ~ file: index.js ~ line 88 ~ players.map ~ nftAttributes', nftAttributes)
           const metadata = transformCharacterData(nftAttributes)
-
+          console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
           metadata['wallet'] = playerWallet
           return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
@@ -110,7 +109,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           let playerWallet = player.wallet
           const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
           const metadata = transformCharacterData(nftAttributes)
-          console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
+
           metadata['wallet'] = playerWallet
           return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
@@ -153,7 +152,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     const fetchBoss = async () => {
       const bossTxn = await gameContract.getBigBoss()
       // console.log('Boss:', bossTxn)
-      setBoss(transformCharacterData(bossTxn))
+      setBoss(transformBossData(bossTxn))
     }
 
     // Setup logic when this event is fired off
@@ -268,28 +267,32 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           </div>
           <div className='bout-stats-data'>
             <table>
-              <tr style={styles.tableRow}>
-                <th>Character</th>
-                <th>Owner</th>
-                <th>HP</th>
-                <th>Damage Dealt</th>
-              </tr>
-              {Object.keys(allNftMetadata).map((id, i) => (
+              <thead>
                 <tr style={styles.tableRow}>
-                  <td style={styles.tableData}>
-                    <img
-                      className='bout-stats-image'
-                      src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
-                      alt={`Character ${allNftMetadata[id].name}`}
-                    />
-                  </td>
-                  <td style={styles.tableData}>
-                    {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
-                  </td>
-                  <td style={styles.tableData}>{allNftMetadata[id].hp}</td>
-                  <td style={styles.tableData}>{allNftMetadata[id].hp}</td>
+                  <th>Character</th>
+                  <th>Owner</th>
+                  <th>HP</th>
+                  <th>Damage Dealt</th>
                 </tr>
-              ))}
+              </thead>
+              <tbody>
+                {Object.keys(allNftMetadata).map((id, i) => (
+                  <tr style={styles.tableRow} key={i}>
+                    <td style={styles.tableData}>
+                      <img
+                        className='bout-stats-image'
+                        src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
+                        alt={`Character ${allNftMetadata[id].name}`}
+                      />
+                    </td>
+                    <td style={styles.tableData}>
+                      {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
+                    </td>
+                    <td style={styles.tableData}>{allNftMetadata[id].hp}</td>
+                    <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </div>
