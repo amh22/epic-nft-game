@@ -11,12 +11,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
   // console.log('🚀 ~ file: index.js ~ line 12 ~ Arena ~ gameContract', gameContract)
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
-  console.log('🚀 ~ file: index.js ~ line 15 ~ Arena ~ currentPlayerWallet', currentPlayerWallet)
   const [boss, setBoss] = useState(null)
-  // const [playerIds, setPlayerIDs] = useState([])
   const [allNftMetadata, setAllNftMetadata] = useState({})
-  // console.log('🚀 ~ file: index.js ~ line 18 ~ Arena ~ allNftMetadata', allNftMetadata)
-  console.log('🚀 ~ file: index.js ~ line 18 ~ Arena ~ allNftMetadata', allNftMetadata[1])
 
   const [attackState, setAttackState] = useState('')
   const [showToast, setShowToast] = useState(false)
@@ -84,8 +80,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   useEffect(() => {
     const fetchAllNFTMetadata = async () => {
       // console.log('Checking for ALL NFT metadata)
-      const players = await gameContract.getAllPlayers() // switch this for another counter????
-      // console.log('🚀 ~ file: index.js ~ line 62 ~ fetchAllNFTMetadata ~ players', players)
+      const players = await gameContract.getAllPlayers()
 
       if (players.length > 0) {
         players.map(async (player) => {
@@ -107,7 +102,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
     // Setup logic when this EVENT is fired off
     const onCharacterMint = async () => {
-      const players = await gameContract.getAllPlayers() // switch this for another counter????
+      const players = await gameContract.getAllPlayers()
 
       if (players.length > 0) {
         players.map(async (player) => {
@@ -126,7 +121,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
     // Setup logic when this event is fired off
     const onAttackComplete = async () => {
-      const players = await gameContract.getAllPlayers() // switch this for another counter????
+      const players = await gameContract.getAllPlayers()
 
       if (players.length > 0) {
         players.map(async (player) => {
@@ -147,7 +142,6 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     if (gameContract) {
       fetchAllNFTMetadata()
       // Listen to our contract on chain for when a new NFT is minted
-      // gameContract.on('NFTMinted', onNFTMint)
       gameContract.on('CharacterNFTMinted', onCharacterMint)
       gameContract.on('AttackComplete', onAttackComplete)
     }
