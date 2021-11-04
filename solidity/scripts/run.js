@@ -13,16 +13,21 @@ const main = async () => {
     'Dwight Schrute', // Boss name
     'Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q', // Boss image
     10000, // Boss hp
-    50 // Boss attack damage
+    50, // Boss attack damage
+    '0xb3dccb4cf7a26f6cf6b120cf5a73875b7bbc655b', // VRF Coordinator Address (Rinkeby)
+    '0x01be23585060835e02b77ef475b0cc51aa1e0709' // LINK Token Address (Rinkeby)
   )
   await gameContract.deployed()
   console.log('Contract deployed to:', gameContract.address)
 
+  await gameContract.deployed()
+  console.log('Contract:', gameContract)
+
   let txn
   // We only have three characters.
   // Let's mint an NFT w/ the character at index 2 of our array.
-  // txn = await gameContract.mintCharacterNFT(2)
-  // await txn.wait()
+  txn = await gameContract.mintCharacterNFT(2)
+  await txn.wait()
 
   // txn = await gameContract.mintCharacterNFT(1)
   // await txn.wait()
@@ -51,6 +56,12 @@ const main = async () => {
 
   let all = await gameContract.getAllPlayers()
   console.log('All Users:', all)
+
+  let random = await gameContract.getRandomNumber()
+  console.log('Random Number:', random)
+
+  let randomRes = await gameContract.randomResult
+  console.log('Random Number:', random)
 
   // let holders = await gameContract.getNFTHolder('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266')
   // console.log('All Holders:', holders)

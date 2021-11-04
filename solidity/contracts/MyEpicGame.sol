@@ -5,22 +5,26 @@ pragma solidity ^0.8.0;
 // NFT contract to inherit from.
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+// Chainlink VRF to inherit from.
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+
 // Helper functions OpenZeppelin provides.
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
 
-// Helper we wrote to encode in Base64
+// Helper we wrote to encode in Base64.
 import { Base64 } from "./libraries/Base64.sol";
 
 // Our contract inherits from ERC721, which is the standard NFT contract!
-contract MyEpicGame is ERC721 {
+
+contract MyEpicGame is ERC721, VRFConsumerBase {
+
+  /* ----------- CHARACTERS ------------- */
 
   // We hold our character's BASE ATTRIBUTES in a struct (a user defined data type).
-  // These come from what we pass into our Constructor below
-  // from our run.js or deploy.js scripts
-  // Then further below we STORE EACH CHARACTER in an ARRAY called 'defaultCharacters'
+
   struct CharacterAttributes {
     uint characterIndex;
     string name;
@@ -31,32 +35,27 @@ contract MyEpicGame is ERC721 {
     uint damageInflicted;
   }
 
-  // Declare an ARRAY called 'defaultCharacters' based on the 'CharacterAttributes' struct
-  // This is the array which holds the default data for EACH of our characters.
-  // This will be HELPFUL WHEN WE MINT NEW CHARACTERS and need to INITIALISE THEIR DATA.
+  // Declare an ARRAY called 'defaultCharacters' based on the 'CharacterAttributes' struct (eg: defaultCharacters[2])
   CharacterAttributes[] defaultCharacters;
-  // calling defaultCharacters[2] will give us that characters default data
 
 
-  // CREATE 2 STATE VARIABLES - like permanent global variables on the contract
+  // CREATE 2 STATE VARIABLES - like permanent global variables on the contract i.e. key: value pairs
 
-  // 'nftHolderAttributes' is where we store the state of the PLAYER'S NFT
   mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
   // We map the NFT's ID (tokenId) to the 'CharacterAttributes' struct. i.e. we use the tokenId as an index to find the CharacterAttributes with that index
   // We do this when we mint the NFT
 
-  // 'nftHolders' lets us map the address (msg.sender) of a Player to the ID of the NFT they own
   mapping(address => uint256) public nftHolders;
+  // 'nftHolders' lets us map the address (msg.sender) of a Player to the ID of the NFT they own
   // Eg: nftHolders[INSERT_PUBLIC_ADDRESS_HERE]
 
-
-  // The tokenId is the NFTs unique identifier, it's just a number that goes 0, 1, 2, 3, etc.
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
+  // The tokenId is the NFTs unique identifier, it's just a number that goes 0, 1, 2, 3, etc.
 
 
-  // BOSS
-  // We hold our Boss's attributes in a struct.
+  /* ----------- THE BOSS ------------- */
+
   struct BigBoss {
     string name;
     string imageURI;
@@ -64,12 +63,13 @@ contract MyEpicGame is ERC721 {
     uint maxHp;
     uint attackDamage;
   }
-  // Create a bigBoss variable that will represent our boss
+  // Create a bigBoss VARIABLE that will represent our boss
   BigBoss public bigBoss;
 
 
-  // PLAYERS
-  // We hold all of our Players (i.e. those who have minted an NFT) in a struct.
+  /* ----------- ALL GAME PLAYERS ------------- */
+
+  // So we can hold all of our Game Players (i.e. those who have minted an NFT).
   struct AllPlayers {
     uint256 id;
     address wallet;
@@ -92,34 +92,61 @@ contract MyEpicGame is ERC721 {
   event NFTMinted(uint256 characterIndex);
 
 
+
+  /* ---------- VARIABLES FOR OUR VRF RANDOM NUMBER ---------- */
+
+  bytes32 internal _keyHash;
+  uint256 internal _fee;
+  uint256 public randomResult;
+  address public VRFCoordinator;
+    // rinkeby: 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B
+  address public LinkToken;
+
+
+  /* ---------- CONSTRUCTOR ---------- */
   // We pass Data into the contract when it's first created to initialize the characters.
-  // We pass these values in from from run.js or deploy.js.
+
   constructor(
     string[] memory characterNames,
     string[] memory characterImageURIs,
     uint[] memory characterHp,
     uint[] memory characterAttackDmg,
     uint[] memory characterDmgInflicted,
-    string memory bossName, // These new variables would be passed in via run.js or deploy.js.
+    string memory bossName,
     string memory bossImageURI,
     uint bossHp,
-    uint bossAttackDamage
-    // Below we add some special identifier symbols for our NFT.
-    // This is the name and symbol for our token, ex Ethereum and ETH. Ours is called
-    // Dwight Club and DUND. Remember, an NFT is just a token!
+    uint bossAttackDamage,
+    address vrfCoordinatorAddress,
+    address linkTokenAddress
+    // Below we add some special identifier symbols for our NFT (which is just a token) - name and symbol.
+    // We also add our Chainlink VRF details
   )
     ERC721("DClub", "TEST")
+    VRFConsumerBase(vrfCoordinatorAddress, linkTokenAddress)
   {
-    // Initialize the boss. Save it to our global "bigBoss" state variable.
-  bigBoss = BigBoss({
-    name: bossName,
-    imageURI: bossImageURI,
-    hp: bossHp,
-    maxHp: bossHp,
-    attackDamage: bossAttackDamage
-  });
 
-  console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
+    /* -------- CHAINLINK VRF -------- */
+
+    // Chainlink VRF Network Oracle and Fee Details
+    _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
+    _fee = 0.1 * 10**18; // 0.1 LINK
+    VRFCoordinator = vrfCoordinatorAddress;
+    LinkToken = linkTokenAddress;
+
+
+
+    /* ---------- INITIALIZE THE BOSS --------- */
+    // Save it to our global "bigBoss" state variable.
+
+    bigBoss = BigBoss({
+      name: bossName,
+      imageURI: bossImageURI,
+      hp: bossHp,
+      maxHp: bossHp,
+      attackDamage: bossAttackDamage
+    });
+
+    console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
 
     // Loop through all the characters, and save their values in our contract so
     // we can use them later when we mint our NFTs.
@@ -144,6 +171,24 @@ contract MyEpicGame is ERC721 {
     // In Solidity, 0 is a default value and we try to stay away from default values.
     _tokenIds.increment();
   }
+
+  /* -------- CHAINLINK VRF -------- */
+
+  /* Requests Randomness */
+
+  function getRandomNumber() public returns (bytes32 requestId) {
+      require(LINK.balanceOf(address(this)) >= _fee, "Not enough LINK - fill contract with faucet");
+      return requestRandomness(_keyHash, _fee);
+  }
+
+  /* Callback function used by VRF Coordinator */
+  function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+      randomResult = randomness % 100;
+  }
+
+  // Implement a withdraw function to avoid locking your LINK in the contract
+  // function withdrawLink() external {}
+
 
   /* ------ CALLED FROM THE FRONTEND to CHECK IF THE SIGNED IN USER ALERADY HAS AN NFT ------------- */
   function checkIfUserHasNFT() public view returns (CharacterAttributes memory) {
@@ -175,20 +220,6 @@ contract MyEpicGame is ERC721 {
       }
     }
 
-  //   /* ------ CALLED FROM THE FRONTEND to GET ALL NFT HOLDER DETAILS ------------- */
-  // function getNFTHolder(address sender) public view returns (CharacterAttributes memory) {
-  //   // Get the tokenId of the user's character NFT
-  //   uint256 userNftTokenId = nftHolders[sender];
-  //   // If the user has a tokenId in the map, return their character.
-  //   if (userNftTokenId > 0) {
-  //     return nftHolderAttributes[userNftTokenId];
-  //   }
-  //   // Else, return an empty character.
-  //   else {
-  //     CharacterAttributes memory emptyStruct;
-  //     return emptyStruct;
-  //   }
-  // }
 
   function getAllDefaultCharacters() public view returns (CharacterAttributes[] memory) {
     return defaultCharacters;
@@ -298,9 +329,10 @@ contract MyEpicGame is ERC721 {
     // Get the state of the player's NFT.
     uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
     CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
-    console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
-    console.log("Damage Inflicted", player.damageInflicted);
-    console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
+    // console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
+    // console.log("Damage Inflicted", player.damageInflicted);
+    // console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
+
 
     // Make sure the player has more than 0 HP.
     require (
@@ -334,8 +366,8 @@ contract MyEpicGame is ERC721 {
     emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted);
 
     // Console for ease.
-    console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
-    console.log("Boss attacked player. New player hp: %s\n", player.hp, player.damageInflicted);
+    // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
+    // console.log("Boss attacked player. New player hp: %s\n", player.hp, player.damageInflicted);
   }
 
 }

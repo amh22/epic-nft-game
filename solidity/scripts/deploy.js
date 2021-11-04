@@ -14,7 +14,9 @@ const main = async () => {
     'Dwight Schrute', // Boss name
     'Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q', // Boss image
     10000, // Boss hp
-    50 // Boss attack damage
+    50, // Boss attack damage
+    0xb3dccb4cf7a26f6cf6b120cf5a73875b7bbc655b, // VRF Coordinator Address (Rinkeby)
+    0x01be23585060835e02b77ef475b0cc51aa1e0709 // LINK Token Address (Rinkeby)
   )
 
   await gameContract.deployed()
