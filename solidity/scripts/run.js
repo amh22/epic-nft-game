@@ -20,8 +20,8 @@ const main = async () => {
   await gameContract.deployed()
   console.log('Contract deployed to:', gameContract.address)
 
-  await gameContract.deployed()
-  console.log('Contract:', gameContract)
+  // await gameContract.deployed()
+  // console.log('Contract:', gameContract)
 
   let txn
   // We only have three characters.
@@ -57,11 +57,11 @@ const main = async () => {
   let all = await gameContract.getAllPlayers()
   console.log('All Users:', all)
 
-  let random = await gameContract.getRandomNumber()
-  console.log('Random Number:', random)
+  // let random = await gameContract.getRandomNumber()
+  // console.log('Random Number:', random)
 
   let randomRes = await gameContract.randomResult
-  console.log('Random Number:', random)
+  console.log('Random Number:', randomRes)
 
   // let holders = await gameContract.getNFTHolder('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266')
   // console.log('All Holders:', holders)

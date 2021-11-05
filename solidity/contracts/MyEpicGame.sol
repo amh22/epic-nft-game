@@ -97,11 +97,11 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
 
   bytes32 internal _keyHash;
   uint256 internal _fee;
-  uint256 public randomResult;
   address public VRFCoordinator;
     // rinkeby: 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B
   address public LinkToken;
 
+  uint256 public randomResult;
 
   /* ---------- CONSTRUCTOR ---------- */
   // We pass Data into the contract when it's first created to initialize the characters.
@@ -132,7 +132,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     _fee = 0.1 * 10**18; // 0.1 LINK
     VRFCoordinator = vrfCoordinatorAddress;
     LinkToken = linkTokenAddress;
-
+    randomResult = 1;
 
 
     /* ---------- INITIALIZE THE BOSS --------- */
@@ -182,12 +182,15 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   }
 
   /* Callback function used by VRF Coordinator */
+  // Here we receive the verified randomness and do somethinh with it
   function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
       randomResult = randomness % 100;
   }
 
   // Implement a withdraw function to avoid locking your LINK in the contract
-  // function withdrawLink() external {}
+  function withdrawLINK(address to, uint256 value) public onlyOwner {
+      require(LINK.transfer(to, value), "Not enough LINK");
+    }
 
 
   /* ------ CALLED FROM THE FRONTEND to CHECK IF THE SIGNED IN USER ALERADY HAS AN NFT ------------- */
@@ -360,6 +363,9 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     } else {
       player.hp = player.hp - bigBoss.attackDamage;
     }
+
+    /* ---------- SET A NEW RANDOM NUMBER ON ATTACK COMPLETE ------------ */
+    getRandomNumber();
 
     // Fires off the event which we can use in our frontend to dynamically update
     // the HP UI

@@ -9,6 +9,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
   // console.log('🚀 ~ file: index.js ~ line 12 ~ Arena ~ gameContract', gameContract)
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
+
   const [boss, setBoss] = useState(null)
   const [allNftMetadata, setAllNftMetadata] = useState({})
 
@@ -88,7 +89,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           console.log('🚀 ~ file: index.js ~ line 88 ~ players.map ~ nftAttributes', nftAttributes)
           const metadata = transformCharacterData(nftAttributes)
           console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
-          metadata['wallet'] = playerWallet
+          metadata['wallet'] = playerWallet.toLowerCase() // to lowercase to match format received Ethereum window query
           return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
       } else {
@@ -160,6 +161,12 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     const fetchBoss = async () => {
       const bossTxn = await gameContract.getBigBoss()
       // console.log('Boss:', bossTxn)
+
+      const randomNumber = await gameContract.randomResult()
+      console.log('🚀 ~ file: index.js ~ line 165 ~ fetchBoss ~ randomNumber', randomNumber)
+      const resultUpdated = randomNumber.toNumber()
+      console.log('🚀 ~ file: index.js ~ line 167 ~ fetchBoss ~ resultUpdated', resultUpdated)
+
       setBoss(transformBossData(bossTxn))
     }
 
