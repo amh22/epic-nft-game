@@ -86,7 +86,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
 
   // On Successful Attack - on the boss
-  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted);
+  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted, string randomFactor);
 
   // When a new NFT has been minted (by anyone)
   event NFTMinted(uint256 characterIndex);
@@ -102,6 +102,16 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   address public LinkToken;
 
   uint256 public randomResult;
+
+  /* ---------- CONTRACT OWNER ---------- */
+
+  address public owner;
+
+  modifier onlyOwner {
+    require(msg.sender == owner, "You are not the owner.");
+    _;
+  }
+
 
   /* ---------- CONSTRUCTOR ---------- */
   // We pass Data into the contract when it's first created to initialize the characters.
@@ -124,6 +134,9 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     ERC721("DClub", "TEST")
     VRFConsumerBase(vrfCoordinatorAddress, linkTokenAddress)
   {
+
+    /* -------- SET THE OWNER -------- */
+    owner = msg.sender;
 
     /* -------- CHAINLINK VRF -------- */
 
@@ -349,9 +362,15 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
       "Error: boss must have HP to attack boss."
     );
 
+    string memory randomType = 'normal';  // consider user bytes32 type instead for strings
+
     // Allow player to attack boss.
     if (bigBoss.hp < player.attackDamage) {
       bigBoss.hp = 0;
+    } else if (randomResult > 50) {
+      randomType = 'double';
+      bigBoss.hp = bigBoss.hp - player.attackDamage * 2; // double damage!
+      player.damageInflicted = player.damageInflicted + player.attackDamage * 2;
     } else {
       bigBoss.hp = bigBoss.hp - player.attackDamage;
       player.damageInflicted = player.damageInflicted + player.attackDamage;
@@ -360,6 +379,9 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // Allow boss to attack player.
     if (player.hp < bigBoss.attackDamage) {
       player.hp = 0;
+    } else if (randomResult < 50) {
+      randomType = 'missed';
+      player.hp = player.hp;  // boss missed!
     } else {
       player.hp = player.hp - bigBoss.attackDamage;
     }
@@ -367,9 +389,12 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     /* ---------- SET A NEW RANDOM NUMBER ON ATTACK COMPLETE ------------ */
     getRandomNumber();
 
+
     // Fires off the event which we can use in our frontend to dynamically update
     // the HP UI
-    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted);
+    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted, randomType);
+
+
 
     // Console for ease.
     // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);

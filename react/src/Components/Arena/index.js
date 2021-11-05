@@ -15,6 +15,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
   const [attackState, setAttackState] = useState('')
   const [showToast, setShowToast] = useState(false)
+  const [toastType, setToastType] = useState('')
 
   const connectWalletAction = async () => {
     try {
@@ -86,9 +87,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           let playerID = player.id
           let playerWallet = player.wallet
           const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-          console.log('🚀 ~ file: index.js ~ line 88 ~ players.map ~ nftAttributes', nftAttributes)
+          // console.log('🚀 ~ file: index.js ~ line 88 ~ players.map ~ nftAttributes', nftAttributes)
           const metadata = transformCharacterData(nftAttributes)
-          console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
+          // console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
           metadata['wallet'] = playerWallet.toLowerCase() // to lowercase to match format received Ethereum window query
           return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
@@ -163,7 +164,6 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       // console.log('Boss:', bossTxn)
 
       const randomNumber = await gameContract.randomResult()
-      console.log('🚀 ~ file: index.js ~ line 165 ~ fetchBoss ~ randomNumber', randomNumber)
       const resultUpdated = randomNumber.toNumber()
       console.log('🚀 ~ file: index.js ~ line 167 ~ fetchBoss ~ resultUpdated', resultUpdated)
 
@@ -171,11 +171,16 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
 
     // Setup logic when this event is fired off
-    const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted) => {
+    const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
       const bossHp = newBossHp.toNumber()
       const playerHp = newPlayerHp.toNumber()
       const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
       console.log('🚀 ~ file: index.js ~ line 171 ~ onAttackComplete ~ playerDmgInflicted', playerDmgInflicted)
+      const randomType = randomFactor
+      console.log('🚀 ~ file: index.js ~ line 180 ~ onAttackComplete ~ randomType', randomType)
+
+      // Set TOAST TYPE message
+      setToastType(randomType)
 
       // console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`)
 
@@ -192,6 +197,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     if (gameContract) {
       // gameContract is ready to go! Let's fetch our boss
       fetchBoss()
+      // listen to contract for an attack
       gameContract.on('AttackComplete', onAttackComplete)
     }
 
@@ -218,6 +224,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
         {/* Add your toast HTML right here */}
         {boss && showToast && (
           <div id='toast' className='show'>
+            {toastType === 'missed' ? 'Missed' : 'Double Damage'}
             <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
           </div>
         )}
@@ -280,6 +287,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       <div className='arena-container'>
         <div className='bout-stats'>
           <div>
+            {toastType === 'missed' && 'Missed'}
+            {toastType === 'double' && 'Double Damage'}
             <h2>Bout Stats</h2>
           </div>
           <div className='bout-stats-data'>
