@@ -14,7 +14,11 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [allNftMetadata, setAllNftMetadata] = useState({})
 
   const [attackState, setAttackState] = useState('')
-  const [showToast, setShowToast] = useState(false)
+  const [hpPlayer, setHpPlayer] = useState(0)
+
+  const [buyHp, setbuyHp] = useState('')
+
+  const [showToast, setShowToast] = useState(true)
   const [toastType, setToastType] = useState('')
 
   const connectWalletAction = async () => {
@@ -58,6 +62,27 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     } catch (error) {
       console.error('Error attacking boss:', error)
       setAttackState('')
+    }
+  }
+
+  const byHpAction = async () => {
+    try {
+      if (gameContract) {
+        setbuyHp('buying')
+        // console.log('Attacking boss...')
+        const buyTxn = await gameContract.attackBoss()
+        await buyTxn.wait()
+        // console.log('buyTxn:', buyTxn)
+        setbuyHp('complete')
+        // Set your toast state to true and then false 5 seconds later
+        setShowToast(true)
+        setTimeout(() => {
+          setShowToast(false)
+        }, 5000)
+      }
+    } catch (error) {
+      console.error('Error purchasing HP:', error)
+      setbuyHp('')
     }
   }
 
@@ -164,8 +189,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       // console.log('Boss:', bossTxn)
 
       const randomNumber = await gameContract.randomResult()
-      const resultUpdated = randomNumber.toNumber()
-      console.log('🚀 ~ file: index.js ~ line 167 ~ fetchBoss ~ resultUpdated', resultUpdated)
+      const randomNumberResult = randomNumber.toNumber()
+      console.log('🚀 ~ file: index.js ~ line 167 ~ fetchBoss ~ Random Number Result', randomNumberResult)
 
       setBoss(transformBossData(bossTxn))
     }
@@ -174,8 +199,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
       const bossHp = newBossHp.toNumber()
       const playerHp = newPlayerHp.toNumber()
+      setHpPlayer(playerHp)
       const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
-      console.log('🚀 ~ file: index.js ~ line 171 ~ onAttackComplete ~ playerDmgInflicted', playerDmgInflicted)
+
       const randomType = randomFactor
       console.log('🚀 ~ file: index.js ~ line 180 ~ onAttackComplete ~ randomType', randomType)
 
@@ -221,12 +247,52 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   return (
     <Fragment>
       <div className='arena-container'>
-        {/* Add your toast HTML right here */}
         {boss && showToast && (
-          <div id='toast' className='show'>
-            {toastType === 'missed' ? 'Missed' : 'Double Damage'}
-            <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
-          </div>
+          <Fragment>
+            <div
+              style={{
+                display: 'flex',
+              }}
+            >
+              <div id='toast' className='show'>
+                {buyHp === 'complete' && (
+                  <Fragment>
+                    <div style={{ paddingTop: '30px' }}>
+                      <div id='descHeader'>HP purchase complete!</div>
+                    </div>
+                    <div style={{ padding: '20px 0px' }}>
+                      <div id='desc'>{`💥 You now have ${characterNFT.hp} HP!`}</div>
+                    </div>
+                  </Fragment>
+                )}
+
+                {toastType === 'missed' && (
+                  <Fragment>
+                    <div style={{ paddingTop: '30px' }}>
+                      <div id='descHeader'>Dwight Missed! Sweet move!</div>
+                    </div>
+                    <div style={{ padding: '20px 0px' }}>
+                      <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+                      <div id='desc'>{`💥 You were hit for ${boss.attackDamage}!`}</div>
+                    </div>
+                  </Fragment>
+                )}
+
+                {toastType === 'double' && (
+                  <Fragment>
+                    <div style={{ paddingTop: '25px' }}>
+                      <div id='descHeader'>BAM!!</div>
+                      <div id='descHeader'>You hit for double damage!</div>
+                    </div>
+                    <div style={{ padding: '20px 0px' }}>
+                      <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+                      <div id='desc'>{`💥 You were hit for ${boss.attackDamage}!`}</div>
+                    </div>
+                  </Fragment>
+                )}
+              </div>
+            </div>
+          </Fragment>
         )}
 
         {/* The BOSS */}
@@ -245,13 +311,43 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 </div>
               </div>
               <div className='attack-container'>
-                <button className='cta-button' onClick={runAttackAction}>
-                  {`💥 Attack ${boss.name}`}
-                </button>
+                {hpPlayer === 0 ? (
+                  <button
+                    style={{
+                      height: '60px',
+                      fontSize: '18px',
+                      backgroundImage: 'linear-gradient(135deg, #ff380b 0%, #ff380b 100%)',
+                      backgroundSize: '200% 200%',
+                      color: 'white',
+                      border: '0',
+                      width: 'auto',
+                      paddingLeft: '40px',
+                      paddingRight: '40px',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                    }}
+                    onClick={byHpAction}
+                  >
+                    {`You're Dead! Buy some HP`}
+                  </button>
+                ) : (
+                  <button className='cta-button' onClick={runAttackAction}>
+                    {`💥 Attack ${boss.name}`}
+                  </button>
+                )}
+
                 {attackState === 'attacking' && (
                   <div className='loading-indicator'>
                     <LoadingIndicator />
                     <p>Attacking ⚔️</p>
+                  </div>
+                )}
+
+                {buyHp === 'buying' && (
+                  <div className='loading-indicator'>
+                    <LoadingIndicator />
+                    <p>Purchasing HP</p>
                   </div>
                 )}
               </div>
