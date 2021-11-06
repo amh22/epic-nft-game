@@ -86,7 +86,10 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
 
   // On Successful Attack - on the boss
-  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted, string randomFactor);
+  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted, string randomFactor, uint256 originalRandom, uint256 newRandom);
+
+  // On Successful HP Purchase
+  event HpPurchaseComplete(uint playerHpReset);
 
   // When a new NFT has been minted (by anyone)
   event NFTMinted(uint256 characterIndex);
@@ -197,7 +200,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   /* Callback function used by VRF Coordinator */
   // Here we receive the verified randomness and do somethinh with it
   function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-      randomResult = randomness % 100;
+      randomResult = randomness;
   }
 
   // Implement a withdraw function to avoid locking your LINK in the contract
@@ -349,6 +352,14 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // console.log("Damage Inflicted", player.damageInflicted);
     // console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
 
+    /* ---------- SET A NEW RANDOM NUMBER ON ATTACK ------------ */
+    // set a new one here so people can't use the existing state varaible that can be read from the contract
+    getRandomNumber();
+
+    // make the randomness also based on the current Player'sinteraction with the contract
+    uint256 seed = (block.timestamp + block.difficulty);
+    uint256 newRandomResult = (randomResult + seed)  % 100;
+
 
     // Make sure the player has more than 0 HP.
     require (
@@ -367,7 +378,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // Allow player to attack boss.
     if (bigBoss.hp < player.attackDamage) {
       bigBoss.hp = 0;
-    } else if (randomResult > 50) {
+    } else if (newRandomResult > 50) {
       randomType = 'double';
       bigBoss.hp = bigBoss.hp - player.attackDamage * 2; // double damage!
       player.damageInflicted = player.damageInflicted + player.attackDamage * 2;
@@ -379,26 +390,48 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // Allow boss to attack player.
     if (player.hp < bigBoss.attackDamage) {
       player.hp = 0;
-    } else if (randomResult < 50) {
+    } else if (newRandomResult <= 50) {
       randomType = 'missed';
       player.hp = player.hp;  // boss missed!
     } else {
       player.hp = player.hp - bigBoss.attackDamage;
     }
 
-    /* ---------- SET A NEW RANDOM NUMBER ON ATTACK COMPLETE ------------ */
-    getRandomNumber();
-
 
     // Fires off the event which we can use in our frontend to dynamically update
     // the HP UI
-    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted, randomType);
+    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted, randomType, randomResult, newRandomResult);
 
 
 
     // Console for ease.
     // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
     // console.log("Boss attacked player. New player hp: %s\n", player.hp, player.damageInflicted);
+  }
+
+  /* --------- PURCHASE HP ---------- */
+
+  function purchaseHp() public {
+    // Get the state of the player's NFT.
+    uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+    CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
+    // console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
+
+    // Make sure the player has 0 HP.
+    require (
+      player.hp == 0,
+      "Error: character must have 0 HP before resetting their HP."
+    );
+
+    player.hp = player.hp + player.maxHp;
+
+
+    // Fires off the event which we can use in our frontend to dynamically update the HP UI
+    emit HpPurchaseComplete(player.hp);
+
+    // Console for ease.
+    // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
+
   }
 
 }
