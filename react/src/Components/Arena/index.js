@@ -14,11 +14,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [allNftMetadata, setAllNftMetadata] = useState({})
 
   const [attackState, setAttackState] = useState('')
-  const [hpPlayer, setHpPlayer] = useState(0)
 
   const [buyHp, setbuyHp] = useState('')
 
-  const [showToast, setShowToast] = useState(true)
+  const [showToast, setShowToast] = useState(false)
   const [toastType, setToastType] = useState('')
 
   const connectWalletAction = async () => {
@@ -43,20 +42,23 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   }
 
-  // Actions
+  // Run ATTACK Action
   const runAttackAction = async () => {
     try {
       if (gameContract) {
         setAttackState('attacking')
         // console.log('Attacking boss...')
+        // Note: if there is no LINK this will do nothing and will confuse the player
+        // Todo: need to check for LINK balance
         const attackTxn = await gameContract.attackBoss()
         await attackTxn.wait()
-        // console.log('attackTxn:', attackTxn)
+
         setAttackState('hit')
         // Set your toast state to true and then false 5 seconds later
         setShowToast(true)
         setTimeout(() => {
           setShowToast(false)
+          setToastType('')
         }, 5000)
       }
     } catch (error) {
@@ -65,23 +67,25 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     }
   }
 
-  const byHpAction = async () => {
+  // Run HP RESET Action
+  const resetHpAction = async () => {
     try {
       if (gameContract) {
         setbuyHp('buying')
-        // console.log('Attacking boss...')
-        const buyTxn = await gameContract.attackBoss()
+        console.log('Resetting HP...')
+        const buyTxn = await gameContract.purchaseHp()
         await buyTxn.wait()
-        // console.log('buyTxn:', buyTxn)
+
         setbuyHp('complete')
         // Set your toast state to true and then false 5 seconds later
         setShowToast(true)
         setTimeout(() => {
           setShowToast(false)
+          setbuyHp('')
         }, 5000)
       }
     } catch (error) {
-      console.error('Error purchasing HP:', error)
+      console.error('Error resetting HP:', error)
       setbuyHp('')
     }
   }
@@ -164,51 +168,77 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       }
     }
 
+    // Setup logic when this event is fired off
+    const onHpPurchaseComplete = async () => {
+      const players = await gameContract.getAllPlayers()
+
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet.toLowerCase()
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          const metadata = transformCharacterData(nftAttributes)
+
+          metadata['wallet'] = playerWallet
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
+    }
+
     // If our gameContract is ready, let's get ALL metadata!
     if (gameContract) {
       fetchAllNFTMetadata()
       // Listen to our contract on chain for when a new NFT is minted
       gameContract.on('CharacterNFTMinted', onCharacterMint)
       gameContract.on('AttackComplete', onAttackComplete)
+      gameContract.on('HpPurchaseComplete', onHpPurchaseComplete)
     }
 
     // Make sure to clean up the events when this component is removed
     return () => {
       if (gameContract) {
-        gameContract.on('CharacterNFTMinted', onCharacterMint)
+        gameContract.off('CharacterNFTMinted', onCharacterMint)
         gameContract.off('AttackComplete', onAttackComplete)
+        gameContract.off('HpPurchaseComplete', onHpPurchaseComplete)
       }
     }
   }, [gameContract])
 
-  /* -------- GET THE BOSS & HANDLED ATTACKS --------- */
+  /* -------- GET THE BOSS, HANDLED ATTACKS, PURCHASE HP --------- */
   useEffect(() => {
     // Setup async function that will get the boss from our contract and set it in state
     const fetchBoss = async () => {
       const bossTxn = await gameContract.getBigBoss()
-      // console.log('Boss:', bossTxn)
-
-      const randomNumber = await gameContract.randomResult()
-      const randomNumberResult = randomNumber.toNumber()
-      console.log('🚀 ~ file: index.js ~ line 167 ~ fetchBoss ~ Random Number Result', randomNumberResult)
 
       setBoss(transformBossData(bossTxn))
     }
 
     // Setup logic when this event is fired off
-    const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
+    const onAttackComplete = (
+      newBossHp,
+      newPlayerHp,
+      newPlayerDmgInflicted,
+      randomFactor,
+      originalRandom,
+      newRandom
+    ) => {
       const bossHp = newBossHp.toNumber()
       const playerHp = newPlayerHp.toNumber()
-      setHpPlayer(playerHp)
       const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
 
       const randomType = randomFactor
-      console.log('🚀 ~ file: index.js ~ line 180 ~ onAttackComplete ~ randomType', randomType)
+      // console.log('🚀 ~ file: index.js ~ line 180 ~ onAttackComplete ~ randomType', randomType)
+
+      // const getOriginalRandom = originalRandom
+      // console.log('🚀 ~ file: index.js ~ line 209 ~ onAttackComplete ~ getOriginalRandom', getOriginalRandom)
+
+      const getNewRandom = newRandom.toNumber()
+      console.log('🚀 ~ file: index.js ~ line 212 ~ onAttackComplete ~ getNewRandom', getNewRandom)
 
       // Set TOAST TYPE message
       setToastType(randomType)
-
-      // console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`)
 
       // Update both player and boss Hp
       setBoss((prevState) => {
@@ -220,17 +250,34 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       })
     }
 
+    // Setup logic when this event is fired off
+    const onHpPurchaseComplete = (playerHpReset) => {
+      console.log('Reset HP Triggered')
+      const resetPlayerHp = playerHpReset.toNumber()
+      console.log('🚀 ~ file: index.js ~ line 243 ~ onHpPurchaseComplete ~ resetPlayerHp', resetPlayerHp)
+
+      // Set Reset to complete
+      setbuyHp('complete')
+
+      // Update Player's character
+      setCharacterNFT((prevState) => {
+        return { ...prevState, hp: resetPlayerHp }
+      })
+    }
+
     if (gameContract) {
       // gameContract is ready to go! Let's fetch our boss
       fetchBoss()
       // listen to contract for an attack
       gameContract.on('AttackComplete', onAttackComplete)
+      gameContract.on('HpPurchaseComplete', onHpPurchaseComplete)
     }
 
     // Make sure to clean up this event when this component is removed
     return () => {
       if (gameContract) {
         gameContract.off('AttackComplete', onAttackComplete)
+        gameContract.off('HpPurchaseComplete', onHpPurchaseComplete)
       }
     }
   }, [gameContract, setCharacterNFT])
@@ -258,7 +305,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 {buyHp === 'complete' && (
                   <Fragment>
                     <div style={{ paddingTop: '30px' }}>
-                      <div id='descHeader'>HP purchase complete!</div>
+                      <div id='descHeader'>HP reset complete!</div>
                     </div>
                     <div style={{ padding: '20px 0px' }}>
                       <div id='desc'>{`💥 You now have ${characterNFT.hp} HP!`}</div>
@@ -273,7 +320,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                     </div>
                     <div style={{ padding: '20px 0px' }}>
                       <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
-                      <div id='desc'>{`💥 You were hit for ${boss.attackDamage}!`}</div>
+                      <div id='desc'>{`You suffered no damage!`}</div>
                     </div>
                   </Fragment>
                 )}
@@ -282,10 +329,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                   <Fragment>
                     <div style={{ paddingTop: '25px' }}>
                       <div id='descHeader'>BAM!!</div>
-                      <div id='descHeader'>You hit for double damage!</div>
+                      <div id='descHeader'>Your hit caused double damage!</div>
                     </div>
                     <div style={{ padding: '20px 0px' }}>
-                      <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+                      <div id='desc'>{`💥 ${boss.name} was hit for ${characterNFT.attackDamage * 2}!`}</div>
                       <div id='desc'>{`💥 You were hit for ${boss.attackDamage}!`}</div>
                     </div>
                   </Fragment>
@@ -311,7 +358,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 </div>
               </div>
               <div className='attack-container'>
-                {hpPlayer === 0 ? (
+                {characterNFT.hp === 0 ? (
                   <button
                     style={{
                       height: '60px',
@@ -327,9 +374,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                       cursor: 'pointer',
                       fontWeight: 'bold',
                     }}
-                    onClick={byHpAction}
+                    onClick={resetHpAction}
                   >
-                    {`You're Dead! Buy some HP`}
+                    {`Game Over! Click to reset your HP`}
                   </button>
                 ) : (
                   <button className='cta-button' onClick={runAttackAction}>
@@ -347,7 +394,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 {buyHp === 'buying' && (
                   <div className='loading-indicator'>
                     <LoadingIndicator />
-                    <p>Purchasing HP</p>
+                    <p>Resetting HP</p>
                   </div>
                 )}
               </div>
@@ -383,8 +430,6 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       <div className='arena-container'>
         <div className='bout-stats'>
           <div>
-            {toastType === 'missed' && 'Missed'}
-            {toastType === 'double' && 'Double Damage'}
             <h2>Bout Stats</h2>
           </div>
           <div className='bout-stats-data'>
@@ -393,7 +438,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                 <tr style={styles.tableRow}>
                   <th>Character</th>
                   <th>Owner</th>
-                  <th>HP</th>
+                  <th>HP Left</th>
                   <th>Damage Dealt</th>
                 </tr>
               </thead>
