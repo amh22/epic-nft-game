@@ -8,7 +8,7 @@ const main = async () => {
       'QmZyjf4kDhQrWiTaTUK9odX7VDoeJzV5LXoSrAzSUVUTCm', // Images
       'QmPspAQkzYn2KrV53kMWJtdyv8VxnfG1Z7R58FAgN4PZaM',
     ],
-    [500, 100, 200], // HP values
+    [500, 350, 200], // HP values
     [100, 50, 25], // Attack damage values
     [0, 0, 0], // Damage inflicted values
     'Dwight Schrute', // Boss name
