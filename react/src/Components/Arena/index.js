@@ -252,9 +252,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
     // Setup logic when this event is fired off
     const onHpPurchaseComplete = (playerHpReset) => {
-      console.log('Reset HP Triggered')
       const resetPlayerHp = playerHpReset.toNumber()
-      console.log('🚀 ~ file: index.js ~ line 243 ~ onHpPurchaseComplete ~ resetPlayerHp', resetPlayerHp)
 
       // Set Reset to complete
       setbuyHp('complete')
@@ -342,127 +340,151 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           </Fragment>
         )}
 
-        {/* The BOSS */}
-        {boss && (
-          <Fragment>
-            {/* {gameContract && <p className='sub-text'>Dwight Club Members: {playerCount}</p>} */}
-            <div className='boss-container'>
-              <div className={`boss-content ${attackState}`}>
-                <h2>🔥 {boss.name} 🔥</h2>
-                <div className='image-content'>
-                  <img src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`} alt={`Boss ${boss.name}`} />
-                  <div className='health-bar'>
-                    <progress value={boss.hp} max={boss.maxHp} />
-                    <p>{`${boss.hp} / ${boss.maxHp} HP`}</p>
+        {/* FIGHTING CONTAINER */}
+        <div className='fighting-stage'>
+          {boss && (
+            <Fragment>
+              <div>
+                {/* The BOSS */}
+                <div className='boss-container'>
+                  <h2>The Boss</h2>
+                  <div className={`boss-content ${attackState}`}>
+                    <h2>🔥 {boss.name} 🔥</h2>
+                    <div className='image-content'>
+                      <img src={`https://cloudflare-ipfs.com/ipfs/${boss.imageURI}`} alt={`Boss ${boss.name}`} />
+                      <div className='health-bar'>
+                        <progress value={boss.hp} max={boss.maxHp} />
+                        <p>{`${boss.hp} / ${boss.maxHp} HP`}</p>
+                      </div>
+                    </div>
+                    <div className='stats'>
+                      <h4>{`⚔️ Attack Damage: ${boss.attackDamage}`}</h4>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className='attack-container'>
-                {characterNFT.hp === 0 ? (
-                  <button
-                    style={{
-                      height: '60px',
-                      fontSize: '18px',
-                      backgroundImage: 'linear-gradient(135deg, #ff380b 0%, #ff380b 100%)',
-                      backgroundSize: '200% 200%',
-                      color: 'white',
-                      border: '0',
-                      width: 'auto',
-                      paddingLeft: '40px',
-                      paddingRight: '40px',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      fontWeight: 'bold',
-                    }}
-                    onClick={resetHpAction}
-                  >
-                    {`Game Over! Click to reset your HP`}
-                  </button>
-                ) : (
-                  <button className='cta-button' onClick={runAttackAction}>
-                    {`💥 Attack ${boss.name}`}
-                  </button>
-                )}
+              {/* ATTACK BUTTON CONTAINER */}
+              <div className='attack-button-container'>
+                <div className='attack-container'>
+                  {characterNFT.hp === 0 ? (
+                    <button
+                      style={{
+                        height: '60px',
+                        fontSize: '18px',
+                        backgroundImage: 'linear-gradient(135deg, #ff380b 0%, #ff380b 100%)',
+                        backgroundSize: '200% 200%',
+                        color: 'white',
+                        border: '0',
+                        width: 'auto',
+                        paddingLeft: '40px',
+                        paddingRight: '40px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                      }}
+                      onClick={resetHpAction}
+                    >
+                      {`Game Over! Click to reset your HP`}
+                    </button>
+                  ) : (
+                    <button className='cta-button' onClick={runAttackAction}>
+                      {`💥 Attack ${boss.name}`}
+                    </button>
+                  )}
 
-                {attackState === 'attacking' && (
-                  <div className='loading-indicator'>
-                    <LoadingIndicator />
-                    <p>Attacking ⚔️</p>
-                  </div>
-                )}
+                  {attackState === 'attacking' && (
+                    <div className='loading-indicator'>
+                      <div style={{ paddingTop: '30px' }}>
+                        <LoadingIndicator />
+                      </div>
+                      <p>Attacking ⚔️</p>
+                    </div>
+                  )}
 
-                {buyHp === 'buying' && (
-                  <div className='loading-indicator'>
-                    <LoadingIndicator />
-                    <p>Resetting HP</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Fragment>
-        )}
-
-        {/* Character NFT */}
-        {characterNFT && (
-          <div className='players-container'>
-            <div className='player-container'>
-              <h2>Your Character</h2>
-              <div className='player'>
-                <div className='image-content'>
-                  <h2>{characterNFT.name}</h2>
-                  <img
-                    src={`https://cloudflare-ipfs.com/ipfs/${characterNFT.imageURI}`}
-                    alt={`Character ${characterNFT.name}`}
-                  />
-                  <div className='health-bar'>
-                    <progress value={characterNFT.hp} max={characterNFT.maxHp} />
-                    <p>{`${characterNFT.hp} / ${characterNFT.maxHp} HP`}</p>
-                  </div>
-                </div>
-                <div className='stats'>
-                  <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
+                  {buyHp === 'buying' && (
+                    <div className='loading-indicator'>
+                      <div style={{ paddingTop: '30px' }}>
+                        <LoadingIndicator />
+                      </div>
+                      <p>Resetting HP</p>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className='arena-container'>
-        <div className='bout-stats'>
-          <div>
-            <h2>Bout Stats</h2>
-          </div>
-          <div className='bout-stats-data'>
-            <table>
-              <thead>
-                <tr style={styles.tableRow}>
-                  <th>Character</th>
-                  <th>Owner</th>
-                  <th>HP Left</th>
-                  <th>Damage Dealt</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.keys(allNftMetadata).map((id, i) => (
-                  <tr style={styles.tableRow} key={i}>
-                    <td style={styles.tableData}>
+            </Fragment>
+          )}
+          {/* Character NFT */}
+          <div style={{ marginBottom: '25px' }}>
+            {characterNFT && (
+              <div className='players-container'>
+                <div>
+                  <h2>Your Character</h2>
+                  <div className='player'>
+                    <div className='image-content'>
+                      <h2>{characterNFT.name}</h2>
                       <img
-                        className='bout-stats-image'
-                        src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
-                        alt={`Character ${allNftMetadata[id].name}`}
+                        src={`https://cloudflare-ipfs.com/ipfs/${characterNFT.imageURI}`}
+                        alt={`Character ${characterNFT.name}`}
                       />
-                    </td>
-                    <td style={styles.tableData}>
-                      {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
-                    </td>
-                    <td style={styles.tableData}>{allNftMetadata[id].hp}</td>
-                    <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div className='health-bar'>
+                        <progress value={characterNFT.hp} max={characterNFT.maxHp} />
+                        <p>{`${characterNFT.hp} / ${characterNFT.maxHp} HP`}</p>
+                      </div>
+                    </div>
+                    <div className='stats'>
+                      <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        <div
+          style={{
+            display: 'flex',
+            padding: '20px 20px 30px 20px',
+          }}
+        >
+          <div className='bout-stats'>
+            <div>
+              <h2>Leaderboard</h2>
+            </div>
+            <div className='bout-stats-data'>
+              <table>
+                <thead>
+                  <tr style={styles.tableRow}>
+                    <th>Character</th>
+                    <th>Owner</th>
+                    <th>HP Left</th>
+                    <th>Damage Dealt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.keys(allNftMetadata).map((id, i) => (
+                    <tr style={styles.tableRow} key={i}>
+                      <td style={styles.tableData}>
+                        <img
+                          className='bout-stats-image'
+                          src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
+                          alt={`Character ${allNftMetadata[id].name}`}
+                        />
+                      </td>
+                      <td style={styles.tableData}>
+                        {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
+                      </td>
+                      <td style={styles.tableData}>{allNftMetadata[id].hp}</td>
+                      <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* End of ARENA CONTAINER */}
       </div>
     </Fragment>
   )
