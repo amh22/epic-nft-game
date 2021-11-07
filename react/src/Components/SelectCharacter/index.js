@@ -130,7 +130,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
   return (
     <div className='select-character-container'>
-      <h2>Mint Your Hero. Choose wisely.</h2>
+      <h2 style={{ paddingBottom: '30px' }}>Mint Your Hero. Choose wisely.</h2>
       {/* Only show this when there are characters in state */}
       {characters.length > 0 && <div className='character-grid'>{renderCharacters()}</div>}
       {/* Only show our loading state if mintingCharacter is true */}

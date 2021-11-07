@@ -153,8 +153,10 @@ const App = () => {
     <div className='App'>
       <div className='container'>
         <div className='header-container'>
-          <p className='header gradient-text'>⚔️ Dwight Club ⚔️</p>
-          <p className='sub-text'>The first rule of Dwight Club is: you do not talk about Dwight Club!</p>
+          <div style={{ padding: '0px 20px' }}>
+            <p className='header gradient-text'>⚔️ Dwight Club ⚔️</p>
+            <p className='sub-text'>The first rule of Dwight Club is: you do not talk about Dwight Club!</p>
+          </div>
           {!currentAccount && <p className='sub-text'>Dwight Club Members: Connect your wallet to find out!</p>}
 
           {renderContent()}

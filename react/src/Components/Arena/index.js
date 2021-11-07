@@ -4,6 +4,8 @@ import { CONTRACT_ADDRESS, transformCharacterData, transformBossData } from '../
 import myEpicGame from '../../utils/MyEpicGame.json'
 import './Arena.css'
 import LoadingIndicator from '../LoadingIndicator'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
 const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
@@ -283,9 +285,26 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   const styles = {
     tableRow: {
       height: '60px',
+      textAlign: 'left',
+    },
+    tablePadding: {
+      padding: '0px 15px 0px 0px',
     },
     tableData: {
-      padding: '5px 20px',
+      padding: '0px 15px 0px 0px',
+      fontWeight: 'bold',
+    },
+    tableDataOwner: {
+      maxWidth: '80px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+    opensea: {
+      color: 'white',
+      fontSize: 'inherit',
+      fontWeight: 'bold',
+      textDecoration: 'none',
     },
   }
 
@@ -455,10 +474,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
               <table>
                 <thead>
                   <tr style={styles.tableRow}>
-                    <th>Character</th>
-                    <th>Owner</th>
-                    <th>HP Left</th>
-                    <th>Damage Dealt</th>
+                    <th style={styles.tablePadding}>Character</th>
+                    <th style={styles.tablePadding}>Damage Dealt</th>
+                    <th style={styles.tablePadding}>Owner</th>
+                    {/* <th>HP Left</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -471,11 +490,20 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                           alt={`Character ${allNftMetadata[id].name}`}
                         />
                       </td>
-                      <td style={styles.tableData}>
-                        {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
-                      </td>
-                      <td style={styles.tableData}>{allNftMetadata[id].hp}</td>
                       <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
+                      <td style={styles.tableData}>
+                        <a href='https://google.com' target='_blank' rel='noopener noreferrer' style={styles.opensea}>
+                          <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                            <p style={styles.tableDataOwner}>
+                              {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
+                            </p>
+                            <span style={{ paddingLeft: '10px' }}>
+                              <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
+                            </span>
+                          </div>
+                        </a>
+                      </td>
+                      {/* <td style={styles.tableData}>{allNftMetadata[id].hp}</td> */}
                     </tr>
                   ))}
                 </tbody>
