@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import './SelectCharacter.css'
 import { ethers } from 'ethers'
 import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants'
 import myEpicGame from '../../utils/MyEpicGame.json'
 import LoadingIndicator from '../LoadingIndicator'
 
-const SelectCharacter = ({ setCharacterNFT }) => {
+const SelectCharacter = ({ setCharacterNFT, setPlayerNftId }) => {
   // Hold ALL of our character metadata from the contract
   const [characters, setCharacters] = useState([])
 
@@ -16,13 +16,24 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
   const [mintingCharacter, setMintingCharacter] = useState(false)
 
+  // Scroll to Mint in Progress indicator on minting
+  const mintingIndicatorRef = useRef(null)
+  const scrollToBottom = () => {
+    mintingIndicatorRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   // Actions
   const mintCharacterNFTAction = (characterId) => async () => {
     try {
       if (gameContract) {
+        // scroll user to bottom to make sure they seey the 'minting in progress' indicator
+        // mainly used for mobile devices
+        scrollToBottom()
+
         // Show our loading indicator
         setMintingCharacter(true)
         // console.log('Minting character in progress...')
+
         const mintTxn = await gameContract.mintCharacterNFT(characterId)
         await mintTxn.wait()
         // console.log('mintTxn:', mintTxn)
@@ -98,15 +109,18 @@ const SelectCharacter = ({ setCharacterNFT }) => {
     // Add a callback method that will fire when this event
     // (i.e. when the button to mint an NFT) is received
     const onCharacterMint = async (sender, tokenId, characterIndex) => {
-      // console.log(
-      //   `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
-      // )
+      console.log(
+        `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
+      )
+
+      const nftId = tokenId.toNumber()
+      setPlayerNftId(nftId)
 
       // Once our character NFT is minted we can fetch the metadata from our contract
       // and set it in state to move onto the Arena
       if (gameContract) {
         const characterNFT = await gameContract.checkIfUserHasNFT()
-        console.log('CharacterNFT: ', characterNFT)
+        // console.log('CharacterNFT: ', characterNFT)
         setCharacterNFT(transformCharacterData(characterNFT))
       }
     }
@@ -146,6 +160,8 @@ const SelectCharacter = ({ setCharacterNFT }) => {
           />
         </div>
       )}
+      {/* For scroll to bottom on mint */}
+      <div ref={mintingIndicatorRef} />
     </div>
   )
 }

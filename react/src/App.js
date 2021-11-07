@@ -15,8 +15,12 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`
 const App = () => {
   // A state variable we use to store our user's public wallet.
   const [currentAccount, setCurrentAccount] = useState(null)
+  console.log('🚀 ~ file: App.js ~ line 18 ~ App ~ currentAccount', currentAccount)
 
   const [characterNFT, setCharacterNFT] = useState(null)
+
+  const [playerNftId, setPlayerNftId] = useState()
+  console.log('🚀 ~ file: App.js ~ line 22 ~ App ~ playerNftId', playerNftId)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -73,11 +77,18 @@ const App = () => {
       )
       // Scenario #2: If wallet is connected, let the user select a character to mint
     } else if (currentAccount && !characterNFT) {
-      return <SelectCharacter setCharacterNFT={setCharacterNFT} />
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} setPlayerNftId={setPlayerNftId} />
 
       // If there is a connected wallet AND characterNFT, it's time to battle!
     } else if (currentAccount && characterNFT) {
-      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} curentAccount={currentAccount} />
+      return (
+        <Arena
+          characterNFT={characterNFT}
+          setCharacterNFT={setCharacterNFT}
+          curentAccount={currentAccount}
+          playerNftId={playerNftId}
+        />
+      )
     }
   }
 
@@ -133,6 +144,7 @@ const App = () => {
       if (txn.name) {
         // console.log('TXN:', txn)
         // console.log('User has character NFT')
+
         setCharacterNFT(transformCharacterData(txn))
       } else {
         console.log('No character NFT found')

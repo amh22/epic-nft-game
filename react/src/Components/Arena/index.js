@@ -7,13 +7,15 @@ import LoadingIndicator from '../LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
-const Arena = ({ characterNFT, setCharacterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
+  console.log('🚀 ~ file: index.js ~ line 11 ~ Arena ~ playerNftId', playerNftId)
   const [gameContract, setGameContract] = useState(null)
-  // console.log('🚀 ~ file: index.js ~ line 12 ~ Arena ~ gameContract', gameContract)
+
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
 
   const [boss, setBoss] = useState(null)
   const [allNftMetadata, setAllNftMetadata] = useState({})
+  console.log('🚀 ~ file: index.js ~ line 17 ~ Arena ~ allNftMetadata', allNftMetadata)
 
   const [attackState, setAttackState] = useState('')
 
@@ -21,6 +23,10 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
   const [showToast, setShowToast] = useState(false)
   const [toastType, setToastType] = useState('')
+  // const [openSeaLink, setOpenSeaLink] = useState('')
+  const [showMintMessage, setShowMintMessage] = useState(true)
+  const [mintMessageViewed, setMintMessageViewed] = useState('')
+  console.log('🚀 ~ file: index.js ~ line 29 ~ Arena ~ mintMessageViewed', mintMessageViewed)
 
   const connectWalletAction = async () => {
     try {
@@ -35,9 +41,9 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
       const accounts = await ethereum.request({
         method: 'eth_requestAccounts',
       })
-
       // Boom! This should print out public address once we authorize Metamask.
       // console.log('Connected', accounts[0])
+
       setCurrentPlayerWallet(accounts[0])
     } catch (error) {
       console.log(error)
@@ -122,6 +128,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           const metadata = transformCharacterData(nftAttributes)
           // console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
           metadata['wallet'] = playerWallet.toLowerCase() // to lowercase to match format received Ethereum window query
+          metadata['token'] = playerID
+          metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
           return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
       } else {
@@ -144,6 +152,8 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           const metadata = transformCharacterData(nftAttributes)
 
           metadata['wallet'] = playerWallet
+          metadata['token'] = playerID
+          metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
           return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
       } else {
@@ -308,6 +318,18 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
     },
   }
 
+  function renderCloseMintMessage() {
+    return (
+      <button
+        onClick={() => setMintMessageViewed('viewed')}
+        className='cta-button connect-wallet-button'
+        style={{ margin: '30px auto 0px' }}
+      >
+        Close
+      </button>
+    )
+  }
+
   return (
     <Fragment>
       <div className='arena-container'>
@@ -357,6 +379,35 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
               </div>
             </div>
           </Fragment>
+        )}
+
+        {showMintMessage && mintMessageViewed === '' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              maxWidth: '50%',
+              background: '#fff',
+              padding: '40px',
+              margin: '20px auto',
+              borderRadius: '8px',
+            }}
+          >
+            <p style={{ color: '#180e1d', fontSize: '20px' }}>
+              Hey there! Your Player NFT has been minted and sent to your wallet. You can view it on OpenSea. It may be
+              blank right now. It can take a max of 10 mins to show up. Here's the link:
+            </p>
+            <a
+              href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerNftId}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              style={{ color: '#35aee2', fontSize: '20px', fontWeight: 'bold' }}
+            >
+              <span>View Your NFT on OpenSea</span>
+            </a>
+
+            {renderCloseMintMessage()}
+          </div>
         )}
 
         {/* FIGHTING CONTAINER */}
@@ -452,6 +503,19 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                     </div>
                     <div className='stats'>
                       <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
+                      <p>
+                        <a
+                          href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerNftId}`}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          style={{ color: 'white', fontSize: '20px', textDecoration: 'none' }}
+                        >
+                          <span>OpenSea</span>
+                          <span style={{ paddingLeft: '10px' }}>
+                            <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
+                          </span>
+                        </a>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -492,7 +556,12 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
                       </td>
                       <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
                       <td style={styles.tableData}>
-                        <a href='https://google.com' target='_blank' rel='noopener noreferrer' style={styles.opensea}>
+                        <a
+                          href={allNftMetadata[id].opensea}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          style={styles.opensea}
+                        >
                           <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                             <p style={styles.tableDataOwner}>
                               {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
