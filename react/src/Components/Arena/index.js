@@ -545,36 +545,39 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(allNftMetadata).map((id, i) => (
-                    <tr style={styles.tableRow} key={i}>
-                      <td style={styles.tableData}>
-                        <img
-                          className='bout-stats-image'
-                          src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
-                          alt={`Character ${allNftMetadata[id].name}`}
-                        />
-                      </td>
-                      <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
-                      <td style={styles.tableData}>
-                        <a
-                          href={allNftMetadata[id].opensea}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          style={styles.opensea}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <p style={styles.tableDataOwner}>
-                              {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
-                            </p>
-                            <span style={{ paddingLeft: '10px' }}>
-                              <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
-                            </span>
-                          </div>
-                        </a>
-                      </td>
-                      {/* <td style={styles.tableData}>{allNftMetadata[id].hp}</td> */}
-                    </tr>
-                  ))}
+                  {Object.keys(allNftMetadata).map((id, i) => {
+                    console.log('🚀 ~ file: index.js ~ line 549 ~ Arena ~ allNftMetadata', allNftMetadata)
+                    return (
+                      <tr style={styles.tableRow} key={i}>
+                        <td style={styles.tableData}>
+                          <img
+                            className='bout-stats-image'
+                            src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
+                            alt={`Character ${allNftMetadata[id].name}`}
+                          />
+                        </td>
+                        <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
+                        <td style={styles.tableData}>
+                          <a
+                            href={allNftMetadata[id].opensea}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            style={styles.opensea}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                              <p style={styles.tableDataOwner}>
+                                {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
+                              </p>
+                              <span style={{ paddingLeft: '10px' }}>
+                                <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
+                              </span>
+                            </div>
+                          </a>
+                        </td>
+                        {/* <td style={styles.tableData}>{allNftMetadata[id].hp}</td> */}
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

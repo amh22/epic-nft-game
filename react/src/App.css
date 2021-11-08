@@ -51,6 +51,7 @@
   flex-direction: column;
   margin: auto;
   max-width: 450px;
+  padding: 0px 20px;
 }
 
 .connect-wallet-container img {

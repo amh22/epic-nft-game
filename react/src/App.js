@@ -7,20 +7,22 @@ import SelectCharacter from './Components/SelectCharacter'
 import myEpicGame from './utils/MyEpicGame.json'
 import Arena from './Components/Arena'
 import LoadingIndicator from './Components/LoadingIndicator'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 // Constants
 const TWITTER_HANDLE = 'andrewmhenry22'
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`
 
 const App = () => {
+  const [correctNetwork, setCorrectNetwork] = useState(false)
+
   // A state variable we use to store our user's public wallet.
   const [currentAccount, setCurrentAccount] = useState(null)
-  console.log('🚀 ~ file: App.js ~ line 18 ~ App ~ currentAccount', currentAccount)
 
   const [characterNFT, setCharacterNFT] = useState(null)
 
   const [playerNftId, setPlayerNftId] = useState()
-  console.log('🚀 ~ file: App.js ~ line 22 ~ App ~ playerNftId', playerNftId)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -55,6 +57,19 @@ const App = () => {
     setIsLoading(false)
   }
 
+  const checkCorrectNetwork = async () => {
+    const { ethereum } = window
+    let chainId = await ethereum.request({ method: 'eth_chainId' })
+    // console.log("Connected to chain " + chainId);
+
+    // String, hex code of the chainId of the Rinkebey test network
+    const rinkebyChainId = '0x4'
+    if (chainId !== rinkebyChainId) {
+      // alert('You are not connected to the Rinkeby Test Network!')
+      setCorrectNetwork(false)
+    } else setCorrectNetwork(true)
+  }
+
   // Render Methods
   const renderContent = () => {
     //  If the app is currently loading, just render out LoadingIndicator
@@ -75,12 +90,59 @@ const App = () => {
           </button>
         </div>
       )
-      // Scenario #2: If wallet is connected, let the user select a character to mint
-    } else if (currentAccount && !characterNFT) {
+      // Scenario #2: If wallet is connected, but NOT on the Rinkeby Test Network
+    } else if (currentAccount && !correctNetwork) {
+      return (
+        <div className='connect-wallet-container'>
+          <img
+            src={`https://cloudflare-ipfs.com/ipfs/Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q`}
+            alt='Dwight Club'
+          />
+          <button
+            className='cta-button connect-wallet-button'
+            onClick={connectWalletAction}
+            disabled={!correctNetwork}
+            style={{ cursor: !correctNetwork ? 'not-allowed' : 'pointer' }}
+          >
+            <span style={{ paddingRight: '10px' }}>
+              <FontAwesomeIcon icon={faExclamationTriangle} color='yellow' />
+            </span>
+            Wallet Is Connected
+          </button>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+
+              background: 'gray',
+              padding: '0px 20px',
+              margin: '10px auto',
+              borderRadius: '5px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div>
+                <span style={{ paddingRight: '40px' }}>
+                  <FontAwesomeIcon icon={faExclamationTriangle} color='yellow' size='lg' />
+                </span>
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ fontSize: '18px', color: 'white' }}>
+                  You need to connect your wallet to the Rinkeby Test Network.
+                </p>
+                <p style={{ fontSize: '18px', color: 'white' }}>Refresh this page once you've done so.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+
+      // Scenario #3: If wallet is connected, , and on correct network, then let the user select a character to mint
+    } else if (currentAccount && correctNetwork && !characterNFT) {
       return <SelectCharacter setCharacterNFT={setCharacterNFT} setPlayerNftId={setPlayerNftId} />
 
       // If there is a connected wallet AND characterNFT, it's time to battle!
-    } else if (currentAccount && characterNFT) {
+    } else if (currentAccount && correctNetwork && characterNFT) {
       return (
         <Arena
           characterNFT={characterNFT}
@@ -92,9 +154,8 @@ const App = () => {
     }
   }
 
-  // Implement your connectWallet method here
-  // A user needs to explicitly tell MetaMask that it should give the frontend
-  // access to their wallet.
+  /* CONNECT WALLET */
+  // A user needs to explicitly tell MetaMask that it should give the frontend access to their wallet.
   const connectWalletAction = async () => {
     try {
       const { ethereum } = window
@@ -122,11 +183,12 @@ const App = () => {
     // Anytime our component mounts, make sure to immediately set our loading state
     setIsLoading(true)
     checkIfWalletIsConnected()
+    checkCorrectNetwork()
   }, [])
 
-  // If a user's wallet is connected, then
-  // check to see if the user ALREADY has minted a character
-  // and if so, display that character
+  /* Check WALLET is CONNECTED */
+  // then check to see if the user ALREADY has minted a character and if so, display that character
+
   useEffect(() => {
     // The function we will call that interacts with out smart contract
     const fetchNFTMetadata = async () => {
@@ -154,12 +216,12 @@ const App = () => {
       setIsLoading(false)
     }
 
-    // We only want to run this, if we have a connected wallet, so:
-    if (currentAccount) {
+    // We only want to run this, if we have a connected wallet, AND user is on the CORRECT NETWORK
+    if (currentAccount && correctNetwork) {
       // console.log('CurrentAccount:', currentAccount)
       fetchNFTMetadata()
     }
-  }, [currentAccount])
+  }, [currentAccount, correctNetwork])
 
   return (
     <div className='App'>
