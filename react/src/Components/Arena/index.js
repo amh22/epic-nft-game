@@ -8,14 +8,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
 const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
-  console.log('🚀 ~ file: index.js ~ line 11 ~ Arena ~ playerNftId', playerNftId)
+  // console.log('🚀 ~ file: index.js ~ line 11 ~ Arena ~ playerNftId', playerNftId)
   const [gameContract, setGameContract] = useState(null)
 
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
 
   const [boss, setBoss] = useState(null)
   const [allNftMetadata, setAllNftMetadata] = useState({})
-  console.log('🚀 ~ file: index.js ~ line 17 ~ Arena ~ allNftMetadata', allNftMetadata)
+  console.log('🚀 ~ file: index.js ~ line 18 ~ Arena ~ allNftMetadata', allNftMetadata)
+
+  const [sortedLeaderBoard, setSortedLeaderBoard] = useState([])
+  // console.log('🚀 ~ file: index.js ~ line 21 ~ Arena ~ sortedLeaderBoard', sortedLeaderBoard)
 
   const [attackState, setAttackState] = useState('')
 
@@ -26,7 +29,6 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
   // const [openSeaLink, setOpenSeaLink] = useState('')
   const [showMintMessage, setShowMintMessage] = useState(true)
   const [mintMessageViewed, setMintMessageViewed] = useState('')
-  console.log('🚀 ~ file: index.js ~ line 29 ~ Arena ~ mintMessageViewed', mintMessageViewed)
 
   const connectWalletAction = async () => {
     try {
@@ -127,19 +129,20 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
     const fetchAllNFTMetadata = async () => {
       // console.log('Checking for ALL NFT metadata)
       const players = await gameContract.getAllPlayers()
+      console.log('🚀 ~ file: index.js ~ line 133 ~ fetchAllNFTMetadata ~ players', players)
 
       if (players.length > 0) {
         players.map(async (player) => {
           let playerID = player.id
           let playerWallet = player.wallet
           const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-          // console.log('🚀 ~ file: index.js ~ line 88 ~ players.map ~ nftAttributes', nftAttributes)
+
           const metadata = transformCharacterData(nftAttributes)
-          // console.log('🚀 ~ file: index.js ~ line 71 ~ players.map ~ metadata', metadata)
+
           metadata['wallet'] = playerWallet.toLowerCase() // to lowercase to match format received Ethereum window query
           metadata['token'] = playerID
           metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
-          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+          setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
         })
       } else {
         console.log('Currently there are no Dwight Club members.')
@@ -300,6 +303,18 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
       }
     }
   }, [gameContract, setCharacterNFT])
+
+  // Sort All the Player Metadata for the Leaderboard
+  useEffect(() => {
+    if (allNftMetadata) {
+      let newArrayDataOfOjbect = Object.values(allNftMetadata)
+
+      newArrayDataOfOjbect.sort((a, b) => b.damageInflicted - a.damageInflicted)
+      return setSortedLeaderBoard(newArrayDataOfOjbect)
+    } else {
+      console.log('Error: There is no metadata')
+    }
+  }, [allNftMetadata])
 
   const styles = {
     tableRow: {
@@ -554,28 +569,22 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(allNftMetadata).map((id, i) => {
-                    console.log('🚀 ~ file: index.js ~ line 549 ~ Arena ~ allNftMetadata', allNftMetadata)
+                  {sortedLeaderBoard.map((item, i) => {
                     return (
                       <tr style={styles.tableRow} key={i}>
                         <td style={styles.tableData}>
                           <img
                             className='bout-stats-image'
-                            src={`https://cloudflare-ipfs.com/ipfs/${allNftMetadata[id].imageURI}`}
-                            alt={`Character ${allNftMetadata[id].name}`}
+                            src={`https://cloudflare-ipfs.com/ipfs/${item.imageURI}`}
+                            alt={`Character ${item.name}`}
                           />
                         </td>
-                        <td style={styles.tableData}>{allNftMetadata[id].damageInflicted}</td>
+                        <td style={styles.tableData}>{item.damageInflicted}</td>
                         <td style={styles.tableData}>
-                          <a
-                            href={allNftMetadata[id].opensea}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            style={styles.opensea}
-                          >
+                          <a href={item.opensea} target='_blank' rel='noopener noreferrer' style={styles.opensea}>
                             <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                               <p style={styles.tableDataOwner}>
-                                {allNftMetadata[id].wallet === currentPlayerWallet ? 'You' : allNftMetadata[id].wallet}
+                                {item.wallet === currentPlayerWallet ? 'You' : item.wallet}
                               </p>
                               <span style={{ paddingLeft: '10px' }}>
                                 <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
