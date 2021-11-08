@@ -324,11 +324,11 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
             charAttributes.name,
             ' -- NFT #: ',
             Strings.toString(_tokenId),
-            '", "description": "This is an NFT that gives you entry to the Dwight Club game!", "image": "ipfs://',
+            '", "description": "This is an NFT that gives you entry to the Dwight Club game.", "image": "',
             charAttributes.imageURI,
-            '", "attributes": [ { "trait_type": "Health Points", "value": ',strHp,', "max_value":',strMaxHp,'}, { "trait_type": "Attack Damage", "value": ',
-            strAttackDamage,'}, { "trait_type": "Damage Inflicted", "value": ',
-            strDamageInflicted,'} ]}'
+            '", "attributes": [ { "trait_type": "Health Points", "value": ',strHp,', "max_value":',strMaxHp,'}, { "trait_type": "Damage Inflicted", "value": ',
+            strDamageInflicted,'}, { "trait_type": "Attack Damage", "value": ',
+            strAttackDamage,'} ]}'
           )
         )
       )
