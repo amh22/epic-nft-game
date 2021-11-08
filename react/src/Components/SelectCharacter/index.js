@@ -42,7 +42,9 @@ const SelectCharacter = ({ setCharacterNFT, setPlayerNftId }) => {
       }
     } catch (error) {
       // console.warn('MintCharacterAction Error:', error)
-      alert("Sorry, we've encounted an error. Please refresh the page and try again.")
+      alert(
+        "Sorry, we've encounted an error. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
+      )
       // If there is a problem, hide the loading indicator as well
       setMintingCharacter(false)
     }
@@ -102,7 +104,9 @@ const SelectCharacter = ({ setCharacterNFT, setPlayerNftId }) => {
         setCharacters(characters)
       } catch (error) {
         // console.error('Something went wrong fetching characters:', error)
-        alert('Sorry, something went wrong fetching characters. Please refresh the page and try again.')
+        alert(
+          'Sorry, something went wrong fetching the characters. Check that you are on the Rinkeby Test Network, then please refresh the page and try again.'
+        )
       }
     }
 

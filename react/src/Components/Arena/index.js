@@ -47,6 +47,9 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
       setCurrentPlayerWallet(accounts[0])
     } catch (error) {
       console.log(error)
+      alert(
+        "Sorry, we've encounted an error. Please check that you are on the Rinkeby Test Network. If so, please refresh the page and try again."
+      )
     }
   }
 
@@ -71,6 +74,9 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
       }
     } catch (error) {
       console.error('Error attacking boss:', error)
+      alert(
+        "Sorry, we've encounted an error with your attack on the boss. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
+      )
       setAttackState('')
     }
   }
@@ -94,6 +100,9 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
       }
     } catch (error) {
       console.error('Error resetting HP:', error)
+      alert(
+        "Sorry, we've encounted an error resetting your HP. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
+      )
       setbuyHp('')
     }
   }
