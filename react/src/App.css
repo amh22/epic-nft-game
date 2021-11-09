@@ -25,8 +25,9 @@
 }
 
 .sub-text {
-  font-size: 25px;
+  font-size: 20px;
   color: white;
+  padding: 5px 0px;
 }
 
 .content-container {

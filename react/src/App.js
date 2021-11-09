@@ -227,9 +227,19 @@ const App = () => {
         <div className='header-container'>
           <div style={{ padding: '0px 20px' }}>
             <p className='header gradient-text'>⚔️ Dwight Club ⚔️</p>
-            <p className='sub-text'>The first rule of Dwight Club is: you do not talk about Dwight Club!</p>
           </div>
-          {!currentAccount && <p className='sub-text'>Dwight Club Members: Connect your wallet to find out!</p>}
+          {currentAccount && correctNetwork && (
+            <ul style={{ listStyleType: 'none', margin: '0', padding: '10px 0px 20px 0px' }}>
+              <li className='sub-text'>You do not talk about Dwight Club!</li>
+            </ul>
+          )}
+          {(!currentAccount || !correctNetwork) && (
+            <ul style={{ listStyleType: 'none', margin: '0', padding: '10px 0px 20px 0px' }}>
+              <li className='sub-text'>1st rule: You do not talk about Dwight Club!</li>
+              <li className='sub-text'>2nd rule: You do not talk about Dwight Club!</li>
+              <li className='sub-text'>3rd rule: Connect to the Rinkeby Network first!</li>
+            </ul>
+          )}
 
           {renderContent()}
         </div>
