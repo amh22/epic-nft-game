@@ -224,6 +224,11 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     }
   }
 
+  /* ------ CALLED FROM THE FRONTEND to CHECK WHAT THE SIGNED IN USER'S NFT ID is ------------- */
+  function getUserNftId(address _addr) public view returns (uint) {
+    return nftHolders[_addr];
+  }
+
   /* ------ CALLED FROM THE FRONTEND to GET NFT ATTRIBUTES FOR all EXISTING USERS based on WALLET ADDRESSES ------------- */
   function getUserNFTCharacterAttributes(uint256 _tokenId) public view returns (CharacterAttributes memory) {
       // The tokenID passed in from the frontend
