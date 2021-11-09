@@ -375,7 +375,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // Make sure the boss has more than 0 HP.
     require (
       bigBoss.hp > 0,
-      "Error: boss must have HP to attack boss."
+      "Error: boss must have HP to attack."
     );
 
     string memory randomType = 'normal';  // consider user bytes32 type instead for strings
