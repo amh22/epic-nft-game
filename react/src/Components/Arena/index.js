@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import { CONTRACT_ADDRESS, transformCharacterData, transformBossData } from '../../constants'
 import myEpicGame from '../../utils/MyEpicGame.json'
 import './Arena.css'
+import MiddleEllipsis from 'react-middle-ellipsis'
 import LoadingIndicator from '../LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
@@ -328,12 +329,6 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
       padding: '0px 15px 0px 0px',
       fontWeight: 'bold',
     },
-    tableDataOwner: {
-      maxWidth: '80px',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
     opensea: {
       color: 'white',
       fontSize: 'inherit',
@@ -582,10 +577,18 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
                         <td style={styles.tableData}>{item.damageInflicted}</td>
                         <td style={styles.tableData}>
                           <a href={item.opensea} target='_blank' rel='noopener noreferrer' style={styles.opensea}>
-                            <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                              <p style={styles.tableDataOwner}>
-                                {item.wallet === currentPlayerWallet ? 'You' : item.wallet}
-                              </p>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'flex-start',
+                                alignItems: 'center',
+                                maxWidth: '130px',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <MiddleEllipsis>
+                                <span>{item.wallet === currentPlayerWallet ? 'You' : item.wallet}</span>
+                              </MiddleEllipsis>
                               <span style={{ paddingLeft: '10px' }}>
                                 <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
                               </span>
