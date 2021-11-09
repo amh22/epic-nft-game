@@ -8,18 +8,15 @@ import LoadingIndicator from '../LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
-const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
-  // console.log('🚀 ~ file: index.js ~ line 11 ~ Arena ~ playerNftId', playerNftId)
+const Arena = ({ characterNFT, setCharacterNFT }) => {
   const [gameContract, setGameContract] = useState(null)
 
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
 
   const [boss, setBoss] = useState(null)
   const [allNftMetadata, setAllNftMetadata] = useState({})
-  console.log('🚀 ~ file: index.js ~ line 18 ~ Arena ~ allNftMetadata', allNftMetadata)
 
   const [sortedLeaderBoard, setSortedLeaderBoard] = useState([])
-  // console.log('🚀 ~ file: index.js ~ line 21 ~ Arena ~ sortedLeaderBoard', sortedLeaderBoard)
 
   const [attackState, setAttackState] = useState('')
 
@@ -76,7 +73,7 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
         }, 5000)
       }
     } catch (error) {
-      console.error('Error attacking boss:', error)
+      // console.error('Error attacking boss:', error)
       alert(
         "Sorry, we've encounted an error with your attack on the boss. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
       )
@@ -89,7 +86,7 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
     try {
       if (gameContract) {
         setbuyHp('buying')
-        console.log('Resetting HP...')
+        // console.log('Resetting HP...')
         const buyTxn = await gameContract.purchaseHp()
         await buyTxn.wait()
 
@@ -102,7 +99,7 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
         }, 5000)
       }
     } catch (error) {
-      console.error('Error resetting HP:', error)
+      // console.error('Error resetting HP:', error)
       alert(
         "Sorry, we've encounted an error resetting your HP. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
       )
@@ -130,7 +127,6 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
     const fetchAllNFTMetadata = async () => {
       // console.log('Checking for ALL NFT metadata)
       const players = await gameContract.getAllPlayers()
-      console.log('🚀 ~ file: index.js ~ line 133 ~ fetchAllNFTMetadata ~ players', players)
 
       if (players.length > 0) {
         players.map(async (player) => {
@@ -417,7 +413,7 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
               blank right now. It can take a max of 10 mins to show up. Here's the link:
             </p>
             <a
-              href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerNftId}`}
+              href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${characterNFT.token}`}
               target='_blank'
               rel='noopener noreferrer'
               style={{ color: '#35aee2', fontSize: '20px', fontWeight: 'bold' }}
@@ -524,7 +520,7 @@ const Arena = ({ characterNFT, setCharacterNFT, playerNftId }) => {
                       <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
                       <p>
                         <a
-                          href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerNftId}`}
+                          href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${characterNFT.token}`}
                           target='_blank'
                           rel='noopener noreferrer'
                           style={{ color: 'white', fontSize: '20px', textDecoration: 'none' }}

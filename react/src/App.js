@@ -21,8 +21,7 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null)
 
   const [characterNFT, setCharacterNFT] = useState(null)
-
-  const [playerNftId, setPlayerNftId] = useState()
+  console.log('🚀 ~ file: App.js ~ line 24 ~ App ~ characterNFT', characterNFT)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -139,18 +138,11 @@ const App = () => {
 
       // Scenario #3: If wallet is connected, , and on correct network, then let the user select a character to mint
     } else if (currentAccount && correctNetwork && !characterNFT) {
-      return <SelectCharacter setCharacterNFT={setCharacterNFT} setPlayerNftId={setPlayerNftId} />
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} />
 
       // If there is a connected wallet AND characterNFT, it's time to battle!
     } else if (currentAccount && correctNetwork && characterNFT) {
-      return (
-        <Arena
-          characterNFT={characterNFT}
-          setCharacterNFT={setCharacterNFT}
-          curentAccount={currentAccount}
-          playerNftId={playerNftId}
-        />
-      )
+      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} curentAccount={currentAccount} />
     }
   }
 
@@ -198,16 +190,19 @@ const App = () => {
       const signer = provider.getSigner()
       const gameContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicGame.abi, signer)
 
-      // NOW CONNECT TO THE BLOCKCHAIN! COOL!
-      // and check to see if the user has an character already
-      // by checking for the 'name'
-      const txn = await gameContract.checkIfUserHasNFT()
+      // NOW CONNECT TO THE BLOCKCHAIN! COOL! and check to see if the user has an character already by checking for the 'name'
+      const characterNFT = await gameContract.checkIfUserHasNFT()
 
-      if (txn.name) {
-        // console.log('TXN:', txn)
+      if (characterNFT.name) {
+        // console.log('characterNFT:', characterNFT)
         // console.log('User has character NFT')
 
-        setCharacterNFT(transformCharacterData(txn))
+        const transformCharData = transformCharacterData(characterNFT)
+
+        const getNftId = await gameContract.getUserNftId(currentAccount)
+        transformCharData['token'] = getNftId
+
+        setCharacterNFT(transformCharData)
       } else {
         console.log('No character NFT found')
       }
