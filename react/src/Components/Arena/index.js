@@ -304,7 +304,8 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
       let newArrayDataOfOjbect = Object.values(allNftMetadata)
 
       newArrayDataOfOjbect.sort((a, b) => b.damageInflicted - a.damageInflicted)
-      return setSortedLeaderBoard(newArrayDataOfOjbect)
+
+      setSortedLeaderBoard(newArrayDataOfOjbect)
     } else {
       console.log('Error: There is no metadata')
     }
