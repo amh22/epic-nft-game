@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
 const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMessage }) => {
+  console.log('🚀 ~ file: index.js ~ line 12 ~ Arena ~ characterNFT', characterNFT)
   const [gameContract, setGameContract] = useState(null)
 
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
