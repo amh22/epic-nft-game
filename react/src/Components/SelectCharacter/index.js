@@ -5,7 +5,7 @@ import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants'
 import myEpicGame from '../../utils/MyEpicGame.json'
 import LoadingIndicator from '../LoadingIndicator'
 
-const SelectCharacter = ({ setCharacterNFT }) => {
+const SelectCharacter = ({ setCharacterNFT, setShowMintMessage }) => {
   const [characters, setCharacters] = useState([]) // Hold ALL of our character metadata from the contract
   const [gameContract, setGameContract] = useState(null) // Get access to all the functions on the contract
   const [mintingCharacter, setMintingCharacter] = useState(false)
@@ -115,6 +115,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
 
         transformCharData['token'] = nftId
         setCharacterNFT(transformCharData) // Set the character attributes to state
+        setShowMintMessage(true) // Show the 'your player has been minted message in Arena
       }
     }
 
@@ -133,7 +134,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         gameContract.off('CharacterNFTMinted', onCharacterMint)
       }
     }
-  }, [gameContract, setCharacterNFT])
+  }, [gameContract, setCharacterNFT, setShowMintMessage])
 
   return (
     <div className='select-character-container'>

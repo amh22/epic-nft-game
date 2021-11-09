@@ -8,7 +8,7 @@ import LoadingIndicator from '../LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
-const Arena = ({ characterNFT, setCharacterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMessage }) => {
   const [gameContract, setGameContract] = useState(null)
 
   const [currentPlayerWallet, setCurrentPlayerWallet] = useState(null)
@@ -24,9 +24,6 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
 
   const [showToast, setShowToast] = useState(false)
   const [toastType, setToastType] = useState('')
-  // const [openSeaLink, setOpenSeaLink] = useState('')
-  const [showMintMessage, setShowMintMessage] = useState(true)
-  const [mintMessageViewed, setMintMessageViewed] = useState('')
 
   const connectWalletAction = async () => {
     try {
@@ -336,7 +333,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
   function renderCloseMintMessage() {
     return (
       <button
-        onClick={() => setMintMessageViewed('viewed')}
+        onClick={() => setShowMintMessage(false)}
         className='cta-button connect-wallet-button'
         style={{ margin: '30px auto 0px' }}
       >
@@ -396,7 +393,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           </Fragment>
         )}
 
-        {showMintMessage && mintMessageViewed === '' && (
+        {showMintMessage && (
           <div
             style={{
               display: 'flex',
@@ -538,7 +535,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
             )}
           </div>
         </div>
-
+        {/* Leaderboard */}
         <div
           style={{
             display: 'flex',

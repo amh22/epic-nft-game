@@ -21,9 +21,10 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState(null)
 
   const [characterNFT, setCharacterNFT] = useState(null)
-  console.log('🚀 ~ file: App.js ~ line 24 ~ App ~ characterNFT', characterNFT)
 
   const [isLoading, setIsLoading] = useState(false)
+
+  const [showMintMessage, setShowMintMessage] = useState(false)
 
   // We run this on component load
   const checkIfWalletIsConnected = async () => {
@@ -141,11 +142,19 @@ const App = () => {
 
       // Scenario #3: If wallet is connected, , and on correct network, then let the user select a character to mint
     } else if (currentAccount && correctNetwork && !characterNFT) {
-      return <SelectCharacter setCharacterNFT={setCharacterNFT} />
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} setShowMintMessage={setShowMintMessage} />
 
       // If there is a connected wallet AND characterNFT, it's time to battle!
     } else if (currentAccount && correctNetwork && characterNFT) {
-      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} curentAccount={currentAccount} />
+      return (
+        <Arena
+          characterNFT={characterNFT}
+          setCharacterNFT={setCharacterNFT}
+          curentAccount={currentAccount}
+          showMintMessage={showMintMessage}
+          setShowMintMessage={setShowMintMessage}
+        />
+      )
     }
   }
 
@@ -197,9 +206,6 @@ const App = () => {
       const characterNFT = await gameContract.checkIfUserHasNFT()
 
       if (characterNFT.name) {
-        // console.log('characterNFT:', characterNFT)
-        // console.log('User has character NFT')
-
         const transformCharData = transformCharacterData(characterNFT)
 
         const getNftId = await gameContract.getUserNftId(currentAccount)
