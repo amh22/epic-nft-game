@@ -83,7 +83,9 @@ const App = () => {
           <img
             src={`https://cloudflare-ipfs.com/ipfs/Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q`}
             alt='Dwight Club'
+            style={{ border: '1px solid white', borderRadius: '10px', marginBottom: '15px' }}
           />
+
           <button className='cta-button connect-wallet-button' onClick={connectWalletAction}>
             Connect Wallet To Get Started
           </button>
@@ -96,6 +98,7 @@ const App = () => {
           <img
             src={`https://cloudflare-ipfs.com/ipfs/Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q`}
             alt='Dwight Club'
+            style={{ border: '1px solid white', borderRadius: '10px', marginBottom: '15px' }}
           />
           <button
             className='cta-button connect-wallet-button'
