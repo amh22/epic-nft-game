@@ -110,10 +110,9 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
     try {
       if (gameContract) {
         setLeaderboardRefresh('refreshing')
-        console.log('Resetting Leaderboard...')
+        // console.log('Resetting Leaderboard...')
         const players = await gameContract.getAllPlayers()
-        console.log('🚀 ~ file: index.js ~ line 115 ~ resetLeaderboardAction ~ players', players)
-        console.log('🚀 ~ file: index.js ~ line 115 ~ resetLeaderboardAction ~ players', players.length)
+
         // await players.wait()
 
         players.map(async (player) => {
