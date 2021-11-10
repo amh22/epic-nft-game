@@ -133,7 +133,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // Below we add some special identifier symbols for our NFT (which is just a token) - name and symbol.
     // We also add our Chainlink VRF details
   )
-    ERC721("DClub V", "DCLUB")
+    ERC721("Dwight Club III", "DCLUB")
     VRFConsumerBase(vrfCoordinatorAddress, linkTokenAddress)
   {
 

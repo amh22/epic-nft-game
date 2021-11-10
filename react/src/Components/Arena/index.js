@@ -163,9 +163,9 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
     }
 
     // Setup logic when this event is fired off
-    const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
+    const onAttackComplete = async (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
       const bossHp = newBossHp.toNumber()
-      const playerHp = newPlayerHp.toNumber()
+      const playerHp = await newPlayerHp.toNumber()
       console.log('🚀 ~ file: index.js ~ line 275 ~ onAttackComplete ~ playerHp', playerHp)
       const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
 
@@ -363,7 +363,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
 
       // UPDATE THE CURRENT USER'S CHARACTER
       const bossHp = newBossHp.toNumber()
-      const playerHp = newPlayerHp.toNumber()
+      const playerHp = await newPlayerHp.toNumber()
       const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
 
       // Update both player and boss Hp
