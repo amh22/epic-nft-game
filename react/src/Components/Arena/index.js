@@ -411,7 +411,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
         gameContract.off('HpPurchaseComplete', onHpPurchaseComplete)
       }
     }
-  }, [gameContract])
+  }, [gameContract, setCharacterNFT])
 
   // Sort All the Player Metadata for the Leaderboard
   useEffect(() => {
