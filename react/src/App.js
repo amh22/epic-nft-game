@@ -240,7 +240,7 @@ const App = () => {
             </ul>
           )}
           {(!currentAccount || !correctNetwork) && (
-            <ul style={{ listStyleType: 'none', margin: '0', padding: '10px 0px 20px 0px' }}>
+            <ul style={{ listStyleType: 'none', margin: '10px', padding: '10px 20px 20px 20px' }}>
               <li className='sub-text'>1st rule: You do not talk about Dwight Club!</li>
               <li className='sub-text'>2nd rule: You do not talk about Dwight Club!</li>
               <li className='sub-text'>3rd rule: Connect to the Rinkeby Network first!</li>
