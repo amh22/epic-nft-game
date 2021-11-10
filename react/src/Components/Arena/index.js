@@ -406,17 +406,29 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
               borderRadius: '8px',
             }}
           >
-            <p style={{ color: '#180e1d', fontSize: '20px' }}>
-              Hey there! Your Player NFT has been minted and sent to your wallet. You can view it on OpenSea. It may be
-              blank right now. It can take a max of 10 mins to show up. Here's the link:
+            <p style={{ color: '#180e1d', fontSize: '18px' }}>
+              Hey there! Your Player NFT has been minted and sent to your wallet.
             </p>
+            <p style={{ color: '#180e1d', fontSize: '18px' }}>
+              You can view it on OpenSea or Rarible. It may be blank right now. It can take a max of 10 mins to show up.
+              You can also use the refresh metadata feature on either of those marketplaces to load the data.
+            </p>
+            <p style={{ color: '#180e1d', fontSize: '18px', paddingBottom: '10px' }}>Here are the links:</p>
             <a
               href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${characterNFT.token}`}
               target='_blank'
               rel='noopener noreferrer'
-              style={{ color: '#35aee2', fontSize: '20px', fontWeight: 'bold' }}
+              style={{ color: '#35aee2', fontSize: '20px', fontWeight: 'bold', paddingBottom: '15px' }}
             >
-              <span>View Your NFT on OpenSea</span>
+              <span>OpenSea</span>
+            </a>
+            <a
+              href={`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${characterNFT.token}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              style={{ color: '#35aee2', fontSize: '20px', fontWeight: 'bold', paddingBottom: '10px' }}
+            >
+              <span>Rarible</span>
             </a>
 
             {renderCloseMintMessage()}
@@ -516,19 +528,38 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
                     </div>
                     <div className='stats'>
                       <h4>{`⚔️ Attack Damage: ${characterNFT.attackDamage}`}</h4>
-                      <p>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-around',
+                          padding: '0px 10px 15px 10px',
+                        }}
+                      >
                         <a
                           href={`https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${characterNFT.token}`}
                           target='_blank'
                           rel='noopener noreferrer'
-                          style={{ color: 'white', fontSize: '20px', textDecoration: 'none' }}
+                          style={{ color: 'white', fontSize: '18px', textDecoration: 'none', paddingRight: '20px' }}
                         >
                           <span>OpenSea</span>
                           <span style={{ paddingLeft: '10px' }}>
                             <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
                           </span>
                         </a>
-                      </p>
+                        <a
+                          href={`https://rinkeby.rarible.com/token/${CONTRACT_ADDRESS}:${characterNFT.token}`}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          style={{ color: 'white', fontSize: '18px', textDecoration: 'none' }}
+                        >
+                          <span>Rarible</span>
+                          <span style={{ paddingLeft: '10px' }}>
+                            <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
+                          </span>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
