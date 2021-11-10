@@ -4,7 +4,7 @@ import { CONTRACT_ADDRESS, transformCharacterData, transformBossData } from '../
 import myEpicGame from '../../utils/MyEpicGame.json'
 import './Arena.css'
 import MiddleEllipsis from 'react-middle-ellipsis'
-import { LoadingIndicator, LoadingIndicatorBoard } from '../LoadingIndicator'
+import { LoadingIndicator } from '../LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
@@ -17,7 +17,6 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
   const [allNftMetadata, setAllNftMetadata] = useState({})
 
   const [sortedLeaderBoard, setSortedLeaderBoard] = useState([])
-  const [leaderboardRefresh, setLeaderboardRefresh] = useState('')
 
   const [attackState, setAttackState] = useState('')
 
@@ -106,38 +105,39 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
   }
 
   // Run Leaderboard RESET Action
-  const resetLeaderboardAction = async () => {
-    try {
-      if (gameContract) {
-        setLeaderboardRefresh('refreshing')
-        // console.log('Resetting Leaderboard...')
-        const players = await gameContract.getAllPlayers()
+  // const resetLeaderboardAction = async () => {
+  //   try {
+  //     if (gameContract) {
+  //       setLeaderboardRefresh('refreshing')
+  //       // console.log('Resetting Leaderboard...')
+  //       const players = await gameContract.getAllPlayers()
 
-        // await players.wait()
+  //       // await players.wait()
 
-        players.map(async (player) => {
-          let playerID = player.id
+  //       players.map(async (player) => {
+  //         let playerID = player.id
 
-          let playerWallet = player.wallet.toLowerCase()
-          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+  //         let playerWallet = player.wallet.toLowerCase()
+  //         const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
 
-          const metadata = transformCharacterData(nftAttributes)
+  //         const metadata = transformCharacterData(nftAttributes)
 
-          metadata['wallet'] = playerWallet
-          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
-        })
+  //         metadata['wallet'] = playerWallet
+  //         return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+  //       })
 
-        setLeaderboardRefresh('')
-      }
-    } catch (error) {
-      // console.error('Error resetting HP:', error)
-      alert(
-        "Sorry, we've encounted an error resetting the Leaderboard. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
-      )
-      setLeaderboardRefresh('')
-    }
-  }
+  //       setLeaderboardRefresh('')
+  //     }
+  //   } catch (error) {
+  //     // console.error('Error resetting HP:', error)
+  //     alert(
+  //       "Sorry, we've encounted an error resetting the Leaderboard. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
+  //     )
+  //     setLeaderboardRefresh('')
+  //   }
+  // }
 
+  // Get the CONTRACT
   useEffect(() => {
     const { ethereum } = window
 
@@ -153,111 +153,6 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
     }
   }, [])
 
-  // Get ALL Dwight Club Members Data
-  useEffect(() => {
-    const fetchAllNFTMetadata = async () => {
-      // console.log('Checking for ALL NFT metadata)
-      const players = await gameContract.getAllPlayers()
-
-      if (players.length > 0) {
-        players.map(async (player) => {
-          let playerID = player.id
-          let playerWallet = player.wallet
-          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-
-          const metadata = transformCharacterData(nftAttributes)
-
-          metadata['wallet'] = playerWallet.toLowerCase() // to lowercase to match format received Ethereum window query
-          metadata['token'] = playerID
-          metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
-          setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
-        })
-      } else {
-        console.log('Currently there are no Dwight Club members.')
-      }
-
-      // Once we are done with all the fetching, set loading state to false
-      // setIsLoading(false)
-    }
-
-    // Setup logic when this EVENT is fired off
-    const onCharacterMint = async () => {
-      const players = await gameContract.getAllPlayers()
-
-      if (players.length > 0) {
-        players.map(async (player) => {
-          let playerID = player.id
-          let playerWallet = player.wallet
-          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-          const metadata = transformCharacterData(nftAttributes)
-
-          metadata['wallet'] = playerWallet
-          metadata['token'] = playerID
-          metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
-          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
-        })
-      } else {
-        console.log('Currently there are no Dwight Club members.')
-      }
-    }
-
-    // Setup logic when this event is fired off
-    const onAttackComplete = async () => {
-      const players = await gameContract.getAllPlayers()
-
-      if (players.length > 0) {
-        players.map(async (player) => {
-          let playerID = player.id
-          let playerWallet = player.wallet.toLowerCase()
-          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-          const metadata = transformCharacterData(nftAttributes)
-
-          metadata['wallet'] = playerWallet
-          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
-        })
-      } else {
-        console.log('Currently there are no Dwight Club members.')
-      }
-    }
-
-    // Setup logic when this event is fired off
-    const onHpPurchaseComplete = async () => {
-      const players = await gameContract.getAllPlayers()
-
-      if (players.length > 0) {
-        players.map(async (player) => {
-          let playerID = player.id
-          let playerWallet = player.wallet.toLowerCase()
-          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
-          const metadata = transformCharacterData(nftAttributes)
-
-          metadata['wallet'] = playerWallet
-          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
-        })
-      } else {
-        console.log('Currently there are no Dwight Club members.')
-      }
-    }
-
-    // If our gameContract is ready, let's get ALL metadata!
-    if (gameContract) {
-      fetchAllNFTMetadata()
-      // Listen to our contract on chain for when a new NFT is minted
-      gameContract.on('CharacterNFTMinted', onCharacterMint)
-      gameContract.on('AttackComplete', onAttackComplete)
-      gameContract.on('HpPurchaseComplete', onHpPurchaseComplete)
-    }
-
-    // Make sure to clean up the events when this component is removed
-    return () => {
-      if (gameContract) {
-        gameContract.off('CharacterNFTMinted', onCharacterMint)
-        gameContract.off('AttackComplete', onAttackComplete)
-        gameContract.off('HpPurchaseComplete', onHpPurchaseComplete)
-      }
-    }
-  }, [gameContract])
-
   /* -------- GET THE BOSS, HANDLED ATTACKS, PURCHASE HP --------- */
   useEffect(() => {
     // Setup async function that will get the boss from our contract and set it in state
@@ -268,26 +163,13 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
     }
 
     // Setup logic when this event is fired off
-    const onAttackComplete = (
-      newBossHp,
-      newPlayerHp,
-      newPlayerDmgInflicted,
-      randomFactor,
-      originalRandom,
-      newRandom
-    ) => {
+    const onAttackComplete = (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
       const bossHp = newBossHp.toNumber()
       const playerHp = newPlayerHp.toNumber()
+      console.log('🚀 ~ file: index.js ~ line 275 ~ onAttackComplete ~ playerHp', playerHp)
       const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
 
       const randomType = randomFactor
-      // console.log('🚀 ~ file: index.js ~ line 180 ~ onAttackComplete ~ randomType', randomType)
-
-      // const getOriginalRandom = originalRandom
-      // console.log('🚀 ~ file: index.js ~ line 209 ~ onAttackComplete ~ getOriginalRandom', getOriginalRandom)
-
-      // const getNewRandom = newRandom.toNumber()
-      // console.log('🚀 ~ file: index.js ~ line 212 ~ onAttackComplete ~ getNewRandom', getNewRandom)
 
       // Set TOAST TYPE message
       setToastType(randomType)
@@ -331,6 +213,205 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
       }
     }
   }, [gameContract, setCharacterNFT])
+
+  // Get ALL DWIGHT CLUB MEMBERS Data
+  useEffect(() => {
+    const fetchAllNFTMetadata = async () => {
+      // console.log('Checking for ALL NFT metadata)
+      const players = await gameContract.getAllPlayers()
+
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+
+          const metadata = transformCharacterData(nftAttributes)
+
+          metadata['wallet'] = playerWallet.toLowerCase() // to lowercase to match format received Ethereum window query
+          metadata['token'] = playerID
+          metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
+          setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
+
+      // Once we are done with all the fetching, set loading state to false
+      // setIsLoading(false)
+    }
+
+    // Setup logic when this EVENT is fired off
+    // const onCharacterMint = async () => {
+    //   const players = await gameContract.getAllPlayers()
+
+    //   if (players.length > 0) {
+    //     players.map(async (player) => {
+    //       let playerID = player.id
+    //       let playerWallet = player.wallet
+    //       const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+    //       const metadata = transformCharacterData(nftAttributes)
+
+    //       metadata['wallet'] = playerWallet
+    //       metadata['token'] = playerID
+    //       metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
+    //       return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+    //     })
+    //   } else {
+    //     console.log('Currently there are no Dwight Club members.')
+    //   }
+    // }
+
+    // Setup logic when this event is fired off
+    // const onAttackComplete = async () => {
+    //   const players = await gameContract.getAllPlayers()
+
+    //   if (players.length > 0) {
+    //     players.map(async (player) => {
+    //       let playerID = player.id
+    //       let playerWallet = player.wallet.toLowerCase()
+    //       const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+    //       const metadata = transformCharacterData(nftAttributes)
+
+    //       metadata['wallet'] = playerWallet
+    //       return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+    //     })
+    //   } else {
+    //     console.log('Currently there are no Dwight Club members.')
+    //   }
+    // }
+
+    // Setup logic when this event is fired off
+    // const onHpPurchaseComplete = async () => {
+    //   const players = await gameContract.getAllPlayers()
+
+    //   if (players.length > 0) {
+    //     players.map(async (player) => {
+    //       let playerID = player.id
+    //       let playerWallet = player.wallet.toLowerCase()
+    //       const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+    //       const metadata = transformCharacterData(nftAttributes)
+
+    //       metadata['wallet'] = playerWallet
+    //       return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+    //     })
+    //   } else {
+    //     console.log('Currently there are no Dwight Club members.')
+    //   }
+    // }
+
+    // If our gameContract is ready, let's get ALL metadata!
+    if (gameContract) {
+      fetchAllNFTMetadata()
+      // Listen to our contract on chain for when a new NFT is minted
+      // gameContract.on('CharacterNFTMinted', onCharacterMint)
+      // gameContract.on('AttackComplete', onAttackComplete)
+      // gameContract.on('HpPurchaseComplete', onHpPurchaseComplete)
+    }
+
+    // Make sure to clean up the events when this component is removed
+    // return () => {
+    //   if (gameContract) {
+    //     gameContract.off('CharacterNFTMinted', onCharacterMint)
+    //     gameContract.off('AttackComplete', onAttackComplete)
+    //     gameContract.off('HpPurchaseComplete', onHpPurchaseComplete)
+    //   }
+    // }
+  }, [gameContract])
+
+  // CHECKING AND UPDATE ALL METADATA
+  useEffect(() => {
+    // Setup logic when this EVENT is fired off
+    const onCharacterMint = async () => {
+      const players = await gameContract.getAllPlayers()
+
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          const metadata = transformCharacterData(nftAttributes)
+
+          metadata['wallet'] = playerWallet
+          metadata['token'] = playerID
+          metadata['opensea'] = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${playerID.toNumber()}`
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
+    }
+
+    // Setup logic when this event is fired off
+    const onAttackComplete = async (newBossHp, newPlayerHp, newPlayerDmgInflicted, randomFactor) => {
+      // UPdate the LEADERBOARD
+      const players = await gameContract.getAllPlayers()
+
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet.toLowerCase()
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          const metadata = transformCharacterData(nftAttributes)
+
+          metadata['wallet'] = playerWallet
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
+
+      // UPDATE THE CURRENT USER'S CHARACTER
+      const bossHp = newBossHp.toNumber()
+      const playerHp = newPlayerHp.toNumber()
+      const playerDmgInflicted = newPlayerDmgInflicted.toNumber()
+
+      // Update both player and boss Hp
+      setBoss((prevState) => {
+        return { ...prevState, hp: bossHp }
+      })
+
+      setCharacterNFT((prevState) => {
+        return { ...prevState, hp: playerHp, damageInflicted: playerDmgInflicted }
+      })
+    }
+
+    // Setup logic when this event is fired off
+    const onHpPurchaseComplete = async () => {
+      const players = await gameContract.getAllPlayers()
+
+      if (players.length > 0) {
+        players.map(async (player) => {
+          let playerID = player.id
+          let playerWallet = player.wallet.toLowerCase()
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+          const metadata = transformCharacterData(nftAttributes)
+
+          metadata['wallet'] = playerWallet
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+      } else {
+        console.log('Currently there are no Dwight Club members.')
+      }
+    }
+
+    // If our gameContract is ready, let's get ALL metadata!
+    if (gameContract) {
+      // Listen to our contract on chain for when a new NFT is minted
+      gameContract.on('CharacterNFTMinted', onCharacterMint)
+      gameContract.on('AttackComplete', onAttackComplete)
+      gameContract.on('HpPurchaseComplete', onHpPurchaseComplete)
+    }
+
+    // Make sure to clean up the events when this component is removed
+    return () => {
+      if (gameContract) {
+        gameContract.off('CharacterNFTMinted', onCharacterMint)
+        gameContract.off('AttackComplete', onAttackComplete)
+        gameContract.off('HpPurchaseComplete', onHpPurchaseComplete)
+      }
+    }
+  }, [gameContract])
 
   // Sort All the Player Metadata for the Leaderboard
   useEffect(() => {
@@ -613,7 +694,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
             <div>
               <h2>Leaderboard</h2>
             </div>
-            <div style={{ display: 'flex' }}>
+            {/* <div style={{ display: 'flex' }}>
               <button className='cta-buttonLboard' onClick={resetLeaderboardAction}>
                 Refresh
               </button>
@@ -624,7 +705,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
             <div className='bout-stats-data'>
               <table>
                 <thead>
@@ -637,6 +718,8 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
                 </thead>
                 <tbody>
                   {sortedLeaderBoard.map((item, i) => {
+                    const isCurrentPlayer = item.wallet === currentPlayerWallet
+
                     return (
                       <tr style={styles.tableRow} key={i}>
                         <td style={styles.tableData}>
@@ -659,7 +742,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
                               }}
                             >
                               <MiddleEllipsis>
-                                <span>{item.wallet === currentPlayerWallet ? 'You' : item.wallet}</span>
+                                <span>{isCurrentPlayer ? 'You' : item.wallet}</span>
                               </MiddleEllipsis>
                               <span style={{ paddingLeft: '10px' }}>
                                 <FontAwesomeIcon icon={faExternalLinkAlt} color='white' />
