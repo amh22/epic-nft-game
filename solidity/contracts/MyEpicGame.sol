@@ -86,7 +86,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
 
   // On Successful Attack - on the boss
-  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted, string randomFactor, uint256 originalRandom, uint256 newRandom);
+  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted, string randomFactor);
 
   // On Successful HP Purchase
   event HpPurchaseComplete(uint playerHpReset);
@@ -133,7 +133,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // Below we add some special identifier symbols for our NFT (which is just a token) - name and symbol.
     // We also add our Chainlink VRF details
   )
-    ERC721("Dwight Club II", "DCLUB")
+    ERC721("DClub V", "DCLUB")
     VRFConsumerBase(vrfCoordinatorAddress, linkTokenAddress)
   {
 
@@ -404,7 +404,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
 
     // Fires off the event which we can use in our frontend to dynamically update
     // the HP UI
-    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted, randomType, randomResult, newRandomResult);
+    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted, randomType);
 
 
 
