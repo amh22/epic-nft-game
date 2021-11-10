@@ -1,43 +1,47 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import './SelectCharacter.css'
 import { ethers } from 'ethers'
 import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants'
 import myEpicGame from '../../utils/MyEpicGame.json'
-import LoadingIndicator from '../LoadingIndicator'
+import { LoadingIndicator } from '../LoadingIndicator'
 
-const SelectCharacter = ({ setCharacterNFT }) => {
-  // Hold ALL of our character metadata from the contract
-  const [characters, setCharacters] = useState([])
-
-  // We will use our gameContract in multiple places in our app
-  // so let's put it into state
-  // now we have access to all the functions in the contract
-  const [gameContract, setGameContract] = useState(null)
-
+const SelectCharacter = ({ setCharacterNFT, setShowMintMessage }) => {
+  const [characters, setCharacters] = useState([]) // Hold ALL of our character metadata from the contract
+  const [gameContract, setGameContract] = useState(null) // Get access to all the functions on the contract
   const [mintingCharacter, setMintingCharacter] = useState(false)
 
-  // Actions
+  // Scroll to Mint in Progress indicator on minting
+  const mintingIndicatorRef = useRef(null)
+  const scrollToBottom = () => {
+    mintingIndicatorRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  /* -------- Minting Action ----------- */
   const mintCharacterNFTAction = (characterId) => async () => {
     try {
       if (gameContract) {
+        // scroll user to bottom to make sure they seey the 'minting in progress' indicator (used for mobile devices)
+        scrollToBottom()
+
         // Show our loading indicator
         setMintingCharacter(true)
-        // console.log('Minting character in progress...')
+
         const mintTxn = await gameContract.mintCharacterNFT(characterId)
         await mintTxn.wait()
-        // console.log('mintTxn:', mintTxn)
+
         // Hide our loading indicator when minting is finished
         setMintingCharacter(false)
       }
     } catch (error) {
-      // console.warn('MintCharacterAction Error:', error)
-      alert("Sorry, we've encounted an error. Please refresh the page and try again.")
+      alert(
+        "Sorry, we've encounted an error. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
+      )
       // If there is a problem, hide the loading indicator as well
       setMintingCharacter(false)
     }
   }
 
-  // Render Methods
+  // Render Methods (Characters)
   const renderCharacters = () =>
     characters.map((character, index) => {
       // console.log(character)
@@ -56,7 +60,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
       )
     })
 
-  // Generate our gameContract object
+  /* ---------- Generate our gameContract object ------------ */
   useEffect(() => {
     const { ethereum } = window
 
@@ -65,15 +69,14 @@ const SelectCharacter = ({ setCharacterNFT }) => {
       const signer = provider.getSigner()
       const gameContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicGame.abi, signer)
 
-      // NOW CONNECT TO THE BLOCKCHAIN! COOL!
-      // and Set our gameContract in state.
+      // NOW CONNECT TO THE BLOCKCHAIN! COOL! and Set our gameContract in state.
       setGameContract(gameContract)
     } else {
       console.log('Ethereum object not found')
     }
   }, [])
 
-  // Fetch ALL of the game characters
+  /* ----------- Fetch ALL of the game characters ------------ */
   // and will continue to listen to see if our gameContract changes or is 'null'
   useEffect(() => {
     const getCharacters = async () => {
@@ -91,23 +94,28 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         setCharacters(characters)
       } catch (error) {
         // console.error('Something went wrong fetching characters:', error)
-        alert('Sorry, something went wrong fetching characters. Please refresh the page and try again.')
+        alert(
+          'Sorry, something went wrong fetching the characters. Check that you are on the Rinkeby Test Network, then please refresh the page and try again.'
+        )
       }
     }
 
     // Add a callback method that will fire when this event
-    // (i.e. when the button to mint an NFT) is received
     const onCharacterMint = async (sender, tokenId, characterIndex) => {
       // console.log(
       //   `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
       // )
 
-      // Once our character NFT is minted we can fetch the metadata from our contract
-      // and set it in state to move onto the Arena
+      const nftId = tokenId.toNumber()
+
+      // Now GET the character NFT metadata from our contract
       if (gameContract) {
         const characterNFT = await gameContract.checkIfUserHasNFT()
-        console.log('CharacterNFT: ', characterNFT)
-        setCharacterNFT(transformCharacterData(characterNFT))
+        const transformCharData = transformCharacterData(characterNFT)
+
+        transformCharData['token'] = nftId
+        setCharacterNFT(transformCharData) // Set the character attributes to state
+        setShowMintMessage(true) // Show the 'your player has been minted message in Arena
       }
     }
 
@@ -126,11 +134,11 @@ const SelectCharacter = ({ setCharacterNFT }) => {
         gameContract.off('CharacterNFTMinted', onCharacterMint)
       }
     }
-  }, [gameContract, setCharacterNFT])
+  }, [gameContract, setCharacterNFT, setShowMintMessage])
 
   return (
     <div className='select-character-container'>
-      <h2>Mint Your Hero. Choose wisely.</h2>
+      <h2 style={{ paddingBottom: '30px' }}>Mint Your Hero. Choose wisely.</h2>
       {/* Only show this when there are characters in state */}
       {characters.length > 0 && <div className='character-grid'>{renderCharacters()}</div>}
       {/* Only show our loading state if mintingCharacter is true */}
@@ -146,6 +154,8 @@ const SelectCharacter = ({ setCharacterNFT }) => {
           />
         </div>
       )}
+      {/* For scroll to bottom on mint */}
+      <div ref={mintingIndicatorRef} />
     </div>
   )
 }

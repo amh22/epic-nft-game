@@ -1,16 +1,37 @@
+@media (max-width: 1024px) {
+  .fighting-stage {
+    flex-direction: column;
+  }
+  .attack-button-container {
+    padding: 10px 20px 30px 20px !important;
+  }
+}
+
+.attack-button-container {
+  padding: 20px 20px;
+}
+
 .arena-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: auto;
   color: white;
+  padding: 0px 0px;
+}
+
+.fighting-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .arena-container .boss-container {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  margin-bottom: 50px;
+  /* margin-bottom: 50px; */
 }
 
 .boss-container .boss-content {
@@ -46,7 +67,7 @@
 
 .boss-content h2 {
   margin: 0;
-  padding: 5px 0 10px 0;
+  padding: 20px 0 20px 0;
 }
 
 .boss-content .image-content,
@@ -55,7 +76,7 @@
 }
 
 .boss-content .image-content img {
-  width: 350px;
+  width: 300px;
   height: 300px;
   border-radius: 10px;
   object-fit: cover;
@@ -105,14 +126,14 @@
 .players-container .player {
   display: flex;
   flex-direction: column;
-  max-height: 80%;
+  max-height: 100%;
   padding: 10px;
   border-radius: 10px;
   background-color: gray;
 }
 
 .player .image-content img {
-  width: 250px;
+  width: 300px;
   height: 300px;
   border-radius: 10px;
   object-fit: cover;
@@ -165,7 +186,33 @@
   font-size: 18px;
   background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   background-size: 200% 200%;
-  animation: gradient-animation 4s ease infinite;
+  /* animation: gradient-animation 4s ease infinite; */
+}
+
+.cta-buttonHp {
+  height: 45px;
+  border: 0;
+  width: auto;
+  padding-left: 40px;
+  padding-right: 40px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+}
+
+.cta-buttonLboard {
+  height: 29px;
+  border: 0;
+  width: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: #667eea;
 }
 
 /* Effects */
@@ -221,11 +268,40 @@
   }
 }
 
+/* Leader Board */
+.bout-stats {
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #667eea;
+  border: 1px solid #667eea;
+  border-radius: 10px;
+  padding: 5px 20px 25px 25px;
+}
+
+.bout-stats-data {
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bout-stats-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
 /* Toast */
 #toast {
   visibility: hidden;
   max-width: 500px;
-  height: 90px;
+  height: fit-content;
+  /* height: 90px; */
   margin: auto;
   background-color: gray;
   color: #fff;
@@ -247,46 +323,31 @@
   color: #fff;
   font-size: 28px;
   font-weight: bold;
-  height: 90px;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Toast */
-#toast {
-  visibility: hidden;
-  max-width: 500px;
-  height: 90px;
-  margin: auto;
-  background-color: gray;
-  color: #fff;
-  text-align: center;
-  border-radius: 10px;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  right: 0;
-  bottom: 30px;
-  font-size: 17px;
-  white-space: nowrap;
-}
-
-#toast #desc {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 28px;
-  font-weight: bold;
-  height: 90px;
+  height: fit-content;
+  padding: 0px 0px 15px 0px;
   overflow: hidden;
   white-space: nowrap;
 }
 
 #toast.show {
+  height: fit-content;
   visibility: visible;
   -webkit-animation: fadein 0.5s, expand 0.5s 0.5s, stay 3s 1s, shrink 0.5s 2s, fadeout 0.5s 2.5s;
   animation: fadein 0.5s, expand 0.5s 0.5s, stay 3s 1s, shrink 0.5s 4s, fadeout 0.5s 4.5s;
+}
+
+/* Toast Header */
+#toast #descHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #240bac;
+  font-size: 32px;
+  font-weight: bold;
+  height: fit-content;
+  padding: 0 10px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 @-webkit-keyframes fadein {
@@ -383,4 +444,15 @@
     bottom: 60px;
     opacity: 0;
   }
+}
+
+/* Close Mint Info Message Button */
+.cta-button:hover {
+  opacity: 0.85;
+}
+
+.connect-wallet-button {
+  background: -webkit-linear-gradient(left, #60c657, #35aee2);
+  background-size: 200% 200%;
+  animation: gradient-animation 4s ease infinite;
 }

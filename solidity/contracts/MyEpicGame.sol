@@ -5,19 +5,26 @@ pragma solidity ^0.8.0;
 // NFT contract to inherit from.
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+// Chainlink VRF to inherit from.
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+
 // Helper functions OpenZeppelin provides.
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "hardhat/console.sol";
 
-// Helper we wrote to encode in Base64
+// Helper we wrote to encode in Base64.
 import { Base64 } from "./libraries/Base64.sol";
 
 // Our contract inherits from ERC721, which is the standard NFT contract!
-contract MyEpicGame is ERC721 {
 
-  // We hold our character's attributes in a struct.
+contract MyEpicGame is ERC721, VRFConsumerBase {
+
+  /* ----------- CHARACTERS ------------- */
+
+  // We hold our character's BASE ATTRIBUTES in a struct (a user defined data type).
+
   struct CharacterAttributes {
     uint characterIndex;
     string name;
@@ -25,24 +32,30 @@ contract MyEpicGame is ERC721 {
     uint hp;
     uint maxHp;
     uint attackDamage;
+    uint damageInflicted;
   }
 
-  // The tokenId is the NFTs unique identifier, it's just a number that goes
-  // 0, 1, 2, 3, etc.
-  using Counters for Counters.Counter;
-  Counters.Counter private _tokenIds;
-
-  // Create an array to help us hold the default data for our characters.
-  // This will be helpful when we mint new characters and need to know
-  // things like their HP, AD, etc.
+  // Declare an ARRAY called 'defaultCharacters' based on the 'CharacterAttributes' struct (eg: defaultCharacters[2])
   CharacterAttributes[] defaultCharacters;
 
-  // We map from the nft's ID (tokenId) => that NFTs attributes (CharacterAttributes) struct.
-  // It's where we store the state of the player's NFTs.
-  // nftHolderAttributes is a State Variable on the contract that is publicly available
-  mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
 
-  // We hold our Boss's attributes in a struct.
+  // CREATE 2 STATE VARIABLES - like permanent global variables on the contract i.e. key: value pairs
+
+  mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
+  // We map the NFT's ID (tokenId) to the 'CharacterAttributes' struct. i.e. we use the tokenId as an index to find the CharacterAttributes with that index
+  // We do this when we mint the NFT
+
+  mapping(address => uint256) public nftHolders;
+  // 'nftHolders' lets us map the address (msg.sender) of a Player to the ID of the NFT they own
+  // Eg: nftHolders[INSERT_PUBLIC_ADDRESS_HERE]
+
+  using Counters for Counters.Counter;
+  Counters.Counter private _tokenIds;
+  // The tokenId is the NFTs unique identifier, it's just a number that goes 0, 1, 2, 3, etc.
+
+
+  /* ----------- THE BOSS ------------- */
+
   struct BigBoss {
     string name;
     string imageURI;
@@ -50,47 +63,105 @@ contract MyEpicGame is ERC721 {
     uint maxHp;
     uint attackDamage;
   }
-  // Create a bigBoss variable that will represent our boss
+  // Create a bigBoss VARIABLE that will represent our boss
   BigBoss public bigBoss;
 
-  // A mapping from the User's address to the tokenID of the NFT they own. Gives me an ez way
-  // to store the owner of the NFT and reference it later. Eg: nftHolders[INSERT_PUBLIC_ADDRESS_HERE]
-  // nftHolders is a State Variable on the contract that is publicly available
-  mapping(address => uint256) public nftHolders;
 
-  // Let user know that the mint was successful
-  // It fires when we finish minting the NFT
+  /* ----------- ALL GAME PLAYERS ------------- */
+
+  // So we can hold all of our Game Players (i.e. those who have minted an NFT).
+  struct AllPlayers {
+    uint256 id;
+    address wallet;
+  }
+
+  // Declare an ARRAY called 'gameUsers' based on the 'AllPlayers' struct
+  AllPlayers[] gameUsers;
+
+
+  /* ---------- OUR EVENTS ---------- */
+  // We need to tell Solidity the format of our events before we start firing them
+
+  // On Successful Mint - it fires when we finish minting the NFT
   event CharacterNFTMinted(address sender, uint256 tokenId, uint256 characterIndex);
-  // Let the user know the attack on the boss has been completed
-  event AttackComplete(uint newBossHp, uint newPlayerHp);
 
+  // On Successful Attack - on the boss
+  event AttackComplete(uint newBossHp, uint newPlayerHp, uint newPlayerDmgInflicted, string randomFactor, uint256 originalRandom, uint256 newRandom);
+
+  // On Successful HP Purchase
+  event HpPurchaseComplete(uint playerHpReset);
+
+  // When a new NFT has been minted (by anyone)
+  event NFTMinted(uint256 characterIndex);
+
+
+
+  /* ---------- VARIABLES FOR OUR VRF RANDOM NUMBER ---------- */
+
+  bytes32 internal _keyHash;
+  uint256 internal _fee;
+  address public VRFCoordinator;
+  address public LinkToken;
+
+  uint256 public randomResult;
+
+  /* ---------- CONTRACT OWNER ---------- */
+
+  address public owner;
+
+  modifier onlyOwner {
+    require(msg.sender == owner, "You are not the owner.");
+    _;
+  }
+
+
+  /* ---------- CONSTRUCTOR ---------- */
   // We pass Data into the contract when it's first created to initialize the characters.
-  // We pass these values in from from run.js or deploy.js.
+
   constructor(
     string[] memory characterNames,
     string[] memory characterImageURIs,
     uint[] memory characterHp,
     uint[] memory characterAttackDmg,
-    string memory bossName, // These new variables would be passed in via run.js or deploy.js.
+    uint[] memory characterDmgInflicted,
+    string memory bossName,
     string memory bossImageURI,
     uint bossHp,
-    uint bossAttackDamage
-    // Below we add some special identifier symbols for our NFT.
-    // This is the name and symbol for our token, ex Ethereum and ETH. Ours is called
-    // Dwight Club and DUND. Remember, an NFT is just a token!
+    uint bossAttackDamage,
+    address vrfCoordinatorAddress,
+    address linkTokenAddress
+    // Below we add some special identifier symbols for our NFT (which is just a token) - name and symbol.
+    // We also add our Chainlink VRF details
   )
-    ERC721("Dwight Club", "DUND")
+    ERC721("Dwight Club II", "DCLUB")
+    VRFConsumerBase(vrfCoordinatorAddress, linkTokenAddress)
   {
-    // Initialize the boss. Save it to our global "bigBoss" state variable.
-  bigBoss = BigBoss({
-    name: bossName,
-    imageURI: bossImageURI,
-    hp: bossHp,
-    maxHp: bossHp,
-    attackDamage: bossAttackDamage
-  });
 
-  console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
+    /* -------- SET THE OWNER -------- */
+    owner = msg.sender;
+
+    /* -------- CHAINLINK VRF -------- */
+
+    // Chainlink VRF Network Oracle and Fee Details
+    _keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
+    _fee = 0.1 * 10**18; // 0.1 LINK
+    VRFCoordinator = vrfCoordinatorAddress;
+    LinkToken = linkTokenAddress;
+    randomResult = 1;
+
+
+    /* ---------- INITIALIZE THE BOSS --------- */
+    // Save it to our global "bigBoss" state variable.
+
+    bigBoss = BigBoss({
+      name: bossName,
+      imageURI: bossImageURI,
+      hp: bossHp,
+      maxHp: bossHp,
+      attackDamage: bossAttackDamage
+    });
+
+    console.log("Done initializing boss %s w/ HP %s, img %s", bigBoss.name, bigBoss.hp, bigBoss.imageURI);
 
     // Loop through all the characters, and save their values in our contract so
     // we can use them later when we mint our NFTs.
@@ -101,7 +172,8 @@ contract MyEpicGame is ERC721 {
         imageURI: characterImageURIs[i],
         hp: characterHp[i],
         maxHp: characterHp[i],
-        attackDamage: characterAttackDmg[i]
+        attackDamage: characterAttackDmg[i],
+        damageInflicted: characterDmgInflicted[i]
       }));
 
       CharacterAttributes memory c = defaultCharacters[i];
@@ -115,6 +187,28 @@ contract MyEpicGame is ERC721 {
     _tokenIds.increment();
   }
 
+  /* -------- CHAINLINK VRF -------- */
+
+  /* Requests Randomness */
+
+  function getRandomNumber() public returns (bytes32 requestId) {
+      require(LINK.balanceOf(address(this)) >= _fee, "Not enough LINK - fill contract with faucet");
+      return requestRandomness(_keyHash, _fee);
+  }
+
+  /* Callback function used by VRF Coordinator */
+  // Here we receive the verified randomness and do somethinh with it
+  function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+      randomResult = randomness;
+  }
+
+  // Implement a withdraw function to avoid locking your LINK in the contract
+  function withdrawLINK(address to, uint256 value) public onlyOwner {
+      require(LINK.transfer(to, value), "Not enough LINK");
+    }
+
+
+  /* ------ CALLED FROM THE FRONTEND to CHECK IF THE SIGNED IN USER ALERADY HAS AN NFT ------------- */
   function checkIfUserHasNFT() public view returns (CharacterAttributes memory) {
     // Get the tokenId of the user's character NFT
     uint256 userNftTokenId = nftHolders[msg.sender];
@@ -129,6 +223,27 @@ contract MyEpicGame is ERC721 {
     }
   }
 
+  /* ------ CALLED FROM THE FRONTEND to CHECK WHAT THE SIGNED IN USER'S NFT ID is ------------- */
+  function getUserNftId(address _addr) public view returns (uint) {
+    return nftHolders[_addr];
+  }
+
+  /* ------ CALLED FROM THE FRONTEND to GET NFT ATTRIBUTES FOR all EXISTING USERS based on WALLET ADDRESSES ------------- */
+  function getUserNFTCharacterAttributes(uint256 _tokenId) public view returns (CharacterAttributes memory) {
+      // The tokenID passed in from the frontend
+      uint256 userNftTokenId = _tokenId;
+      // If the user has a tokenId, return their character.
+      if (userNftTokenId > 0) {
+        return nftHolderAttributes[userNftTokenId];
+      }
+      // Else, return an empty character.
+      else {
+        CharacterAttributes memory emptyStruct;
+        return emptyStruct;
+      }
+    }
+
+
   function getAllDefaultCharacters() public view returns (CharacterAttributes[] memory) {
     return defaultCharacters;
   }
@@ -137,19 +252,25 @@ contract MyEpicGame is ERC721 {
     return bigBoss;
   }
 
-  // This is the function where the actual minting is happening
-  // Users will be able to hit this function and get their NFT based on the
-  // characterId (i.e. _characterIndex) they send into the contract at time of mint!
-  function mintCharacterNFT(uint _characterIndex) external {
-    // Get current tokenId (starts at 1 since we incremented in the constructor).
-    // _tokenIds is a state variable which means if we change it, the value is stored
-    // on the contract directly like a global variable that stays permanently in memory.
-    uint256 newItemId = _tokenIds.current();
+  function getAllPlayers() public view returns (AllPlayers[] memory) {
+    return gameUsers;
+  }
 
-    // The magical function! Assigns the tokenId to the caller's wallet address.
-    // You can't call a contract anonymously, you need to have your wallet credentials connected.
-    // It's like signing in and being authenticated
+
+
+  /*  ********** NFT MINTING ********** */
+
+  // Generates an NFT based on the characterId (i.e. _characterIndex) passed into the contract at time of mint!
+  function mintCharacterNFT(uint _characterIndex) external {
+
+    // Set the NFT's ID to the current _tokenIds
+    uint256 newItemId = _tokenIds.current();
+    // This is a state variable which means if we change it, the value is stored on the contract directly like a global variable that stays permanently in memory.
+
+    // Assigns the tokenId to the caller's wallet address.
     _safeMint(msg.sender, newItemId);
+    // You can't call a contract anonymously, you need to have your wallet credentials connected. It's like signing in and being authenticated
+
 
     // We map the tokenId to their character attributes.
     nftHolderAttributes[newItemId] = CharacterAttributes({
@@ -158,10 +279,20 @@ contract MyEpicGame is ERC721 {
       imageURI: defaultCharacters[_characterIndex].imageURI,
       hp: defaultCharacters[_characterIndex].hp,
       maxHp: defaultCharacters[_characterIndex].hp,
-      attackDamage: defaultCharacters[_characterIndex].attackDamage
+      attackDamage: defaultCharacters[_characterIndex].attackDamage,
+      damageInflicted: defaultCharacters[_characterIndex].damageInflicted
     });
 
     console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
+
+    // Push ID's of new players to the 'gameUsers' array as they mint
+    gameUsers.push(AllPlayers({
+        id: newItemId,
+        wallet: msg.sender
+      }));
+
+    console.log("Pushed new player to gameUsers array w/ tokenId %s and wallet %s", newItemId, msg.sender);
+
 
     // Keep an easy way to see who owns what NFT.
     nftHolders[msg.sender] = newItemId;
@@ -169,16 +300,25 @@ contract MyEpicGame is ERC721 {
     // Increment the tokenId for the next person that uses it.
     _tokenIds.increment();
 
-    // Fires off the event so we can notify the user of a successful mint (not 'mine')
+    /* ---- Fire Off EVENTS ---- */
+
+    // notify the user of a successful mint (not 'mine')
     emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
+
+    // notify the frontend when a new Dwight Club member has joined
+    emit NFTMinted(_characterIndex);
   }
 
+  // Platforms like OpenSea and Rarible know to hit tokenURI (i.e. they call it)
+  // since that's the standard way to retrieve the NFTs metadata.
+  // * tokenURI actually has a specific format - it expects the NFT data in JSON (Base64 encoded)
   function tokenURI(uint256 _tokenId) public view override returns (string memory) {
     CharacterAttributes memory charAttributes = nftHolderAttributes[_tokenId];
 
     string memory strHp = Strings.toString(charAttributes.hp);
     string memory strMaxHp = Strings.toString(charAttributes.maxHp);
     string memory strAttackDamage = Strings.toString(charAttributes.attackDamage);
+    string memory strDamageInflicted = Strings.toString(charAttributes.damageInflicted);
 
     string memory json = Base64.encode(
       bytes(
@@ -188,9 +328,10 @@ contract MyEpicGame is ERC721 {
             charAttributes.name,
             ' -- NFT #: ',
             Strings.toString(_tokenId),
-            '", "description": "This is an NFT that lets people play in the Dwight Club game!", "image": "ipfs://',
+            '", "description": "This is an NFT that gives you entry to the Dwight Club game.", "image": "',
             charAttributes.imageURI,
-            '", "attributes": [ { "trait_type": "Health Points", "value": ',strHp,', "max_value":',strMaxHp,'}, { "trait_type": "Attack Damage", "value": ',
+            '", "attributes": [ { "trait_type": "Health Points", "value": ',strHp,', "max_value":',strMaxHp,'}, { "trait_type": "Damage Inflicted", "value": ',
+            strDamageInflicted,'}, { "trait_type": "Attack Damage", "value": ',
             strAttackDamage,'} ]}'
           )
         )
@@ -204,12 +345,25 @@ contract MyEpicGame is ERC721 {
     return output;
   }
 
+
+  /* --------- ATTACK BOSS ---------- */
+
   function attackBoss() public {
     // Get the state of the player's NFT.
     uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
     CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
-    console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
-    console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
+    // console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
+    // console.log("Damage Inflicted", player.damageInflicted);
+    // console.log("Boss %s has %s HP and %s AD", bigBoss.name, bigBoss.hp, bigBoss.attackDamage);
+
+    /* ---------- SET A NEW RANDOM NUMBER ON ATTACK ------------ */
+    // set a new one here so people can't use the existing state varaible that can be read from the contract
+    getRandomNumber();
+
+    // make the randomness also based on the current Player's interaction with the contract
+    uint256 seed = (block.timestamp + block.difficulty);
+    uint256 newRandomResult = (randomResult + seed)  % 100;
+
 
     // Make sure the player has more than 0 HP.
     require (
@@ -220,30 +374,68 @@ contract MyEpicGame is ERC721 {
     // Make sure the boss has more than 0 HP.
     require (
       bigBoss.hp > 0,
-      "Error: boss must have HP to attack boss."
+      "Error: boss must have HP to attack."
     );
+
+    string memory randomType = 'normal';  // consider user bytes32 type instead for strings
 
     // Allow player to attack boss.
     if (bigBoss.hp < player.attackDamage) {
       bigBoss.hp = 0;
+    } else if (newRandomResult > 50) {
+      randomType = 'double';
+      bigBoss.hp = bigBoss.hp - player.attackDamage * 2; // double damage!
+      player.damageInflicted = player.damageInflicted + player.attackDamage * 2;
     } else {
       bigBoss.hp = bigBoss.hp - player.attackDamage;
+      player.damageInflicted = player.damageInflicted + player.attackDamage;
     }
 
     // Allow boss to attack player.
     if (player.hp < bigBoss.attackDamage) {
       player.hp = 0;
+    } else if (newRandomResult <= 50) {
+      randomType = 'missed';
+      player.hp = player.hp;  // boss missed!
     } else {
       player.hp = player.hp - bigBoss.attackDamage;
     }
 
+
     // Fires off the event which we can use in our frontend to dynamically update
     // the HP UI
-    emit AttackComplete(bigBoss.hp, player.hp);
+    emit AttackComplete(bigBoss.hp, player.hp, player.damageInflicted, randomType, randomResult, newRandomResult);
+
+
 
     // Console for ease.
-    console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
-    console.log("Boss attacked player. New player hp: %s\n", player.hp);
+    // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
+    // console.log("Boss attacked player. New player hp: %s\n", player.hp, player.damageInflicted);
+  }
+
+  /* --------- PURCHASE HP ---------- */
+
+  function purchaseHp() public {
+    // Get the state of the player's NFT.
+    uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+    CharacterAttributes storage player = nftHolderAttributes[nftTokenIdOfPlayer];
+    // console.log("\nPlayer w/ character %s about to attack. Has %s HP and %s AD", player.name, player.hp, player.attackDamage);
+
+    // Make sure the player has 0 HP.
+    require (
+      player.hp == 0,
+      "Error: character must have 0 HP before resetting their HP."
+    );
+
+    player.hp = player.hp + player.maxHp;
+
+
+    // Fires off the event which we can use in our frontend to dynamically update the HP UI
+    emit HpPurchaseComplete(player.hp);
+
+    // Console for ease.
+    // console.log("Player attacked boss. New boss hp: %s\n", bigBoss.hp);
+
   }
 
 }

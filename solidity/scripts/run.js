@@ -9,13 +9,19 @@ const main = async () => {
     ],
     [500, 350, 200], // HP values
     [100, 50, 25], // Attack damage values
+    [0, 0, 0], // Damage inflicted values
     'Dwight Schrute', // Boss name
     'Qmd8G2boWJDUxA3DRneuYPL4F44X1XoFRZYxv4gx7gWj7q', // Boss image
     10000, // Boss hp
-    50 // Boss attack damage
+    50, // Boss attack damage
+    '0xb3dccb4cf7a26f6cf6b120cf5a73875b7bbc655b', // VRF Coordinator Address (Rinkeby)
+    '0x01be23585060835e02b77ef475b0cc51aa1e0709' // LINK Token Address (Rinkeby)
   )
   await gameContract.deployed()
   console.log('Contract deployed to:', gameContract.address)
+
+  // await gameContract.deployed()
+  // console.log('Contract:', gameContract)
 
   let txn
   // We only have three characters.
@@ -23,18 +29,45 @@ const main = async () => {
   txn = await gameContract.mintCharacterNFT(2)
   await txn.wait()
 
-  txn = await gameContract.attackBoss()
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(1)
+  // await txn.wait()
 
-  txn = await gameContract.attackBoss()
-  await txn.wait()
+  // txn = await gameContract.mintCharacterNFT(0)
+  // await txn.wait()
+
+  // txn = await gameContract.mintCharacterNFT(0)
+  // await txn.wait()
+
+  // txn = await gameContract.attackBoss()
+  // await txn.wait()
+
+  // txn = await gameContract.attackBoss()
+  // await txn.wait()
 
   // Get the value of the first NFT's URI.
   // Platforms like OpenSea and Rarible know to hit tokenURI
   // since that's the standard way to retrieve the NFTs metadata.
   // * tokenURI actually has a specific format - it expects the NFT data in JSON (Base64 encoded)
   let returnedTokenUri = await gameContract.tokenURI(1)
-  // console.log('Token URI:', returnedTokenUri)
+  console.log('Token URI:', returnedTokenUri)
+
+  let allChars = await gameContract.getAllDefaultCharacters()
+  console.log('All Characters:', allChars)
+
+  let all = await gameContract.getAllPlayers()
+  console.log('All Users:', all)
+
+  // let random = await gameContract.getRandomNumber()
+  // console.log('Random Number:', random)
+
+  let randomRes = await gameContract.randomResult
+  console.log('Random Number:', randomRes)
+
+  // let holders = await gameContract.getNFTHolder('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266')
+  // console.log('All Holders:', holders)
+
+  // let holderAttributes = await gameContract.getUserNFTCharacterAttributes(1)
+  // console.log('Holder Attributes:', holderAttributes)
 }
 
 const runMain = async () => {

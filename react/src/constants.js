@@ -1,6 +1,17 @@
-const CONTRACT_ADDRESS = '0x82aED879A43519414e88d6c692356c4eFeAe66B0'
+const CONTRACT_ADDRESS = '0x5ffa6e459cBc4E0aEF1C71D730f193247d40ca3d'
 
 const transformCharacterData = (characterData) => {
+  return {
+    name: characterData.name,
+    imageURI: characterData.imageURI,
+    hp: characterData.hp.toNumber(),
+    maxHp: characterData.maxHp.toNumber(),
+    attackDamage: characterData.attackDamage.toNumber(),
+    damageInflicted: characterData.damageInflicted.toNumber(),
+  }
+}
+
+const transformBossData = (characterData) => {
   return {
     name: characterData.name,
     imageURI: characterData.imageURI,
@@ -10,4 +21,4 @@ const transformCharacterData = (characterData) => {
   }
 }
 
-export { CONTRACT_ADDRESS, transformCharacterData }
+export { CONTRACT_ADDRESS, transformCharacterData, transformBossData }
