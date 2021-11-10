@@ -6,7 +6,7 @@ import './App.css'
 import SelectCharacter from './Components/SelectCharacter'
 import myEpicGame from './utils/MyEpicGame.json'
 import Arena from './Components/Arena'
-import LoadingIndicator from './Components/LoadingIndicator'
+import { LoadingIndicator } from './Components/LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 

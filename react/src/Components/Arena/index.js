@@ -4,7 +4,7 @@ import { CONTRACT_ADDRESS, transformCharacterData, transformBossData } from '../
 import myEpicGame from '../../utils/MyEpicGame.json'
 import './Arena.css'
 import MiddleEllipsis from 'react-middle-ellipsis'
-import LoadingIndicator from '../LoadingIndicator'
+import { LoadingIndicator, LoadingIndicatorBoard } from '../LoadingIndicator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons'
 
@@ -17,6 +17,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
   const [allNftMetadata, setAllNftMetadata] = useState({})
 
   const [sortedLeaderBoard, setSortedLeaderBoard] = useState([])
+  const [leaderboardRefresh, setLeaderboardRefresh] = useState('')
 
   const [attackState, setAttackState] = useState('')
 
@@ -101,6 +102,40 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
         "Sorry, we've encounted an error resetting your HP. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
       )
       setbuyHp('')
+    }
+  }
+
+  // Run Leaderboard RESET Action
+  const resetLeaderboardAction = async () => {
+    try {
+      if (gameContract) {
+        setLeaderboardRefresh('refreshing')
+        console.log('Resetting Leaderboard...')
+        const players = await gameContract.getAllPlayers()
+        console.log('🚀 ~ file: index.js ~ line 115 ~ resetLeaderboardAction ~ players', players)
+        console.log('🚀 ~ file: index.js ~ line 115 ~ resetLeaderboardAction ~ players', players.length)
+        // await players.wait()
+
+        players.map(async (player) => {
+          let playerID = player.id
+
+          let playerWallet = player.wallet.toLowerCase()
+          const nftAttributes = await gameContract.getUserNFTCharacterAttributes(playerID)
+
+          const metadata = transformCharacterData(nftAttributes)
+
+          metadata['wallet'] = playerWallet
+          return setAllNftMetadata((prevState) => ({ ...prevState, [playerID.toString()]: metadata }))
+        })
+
+        setLeaderboardRefresh('')
+      }
+    } catch (error) {
+      // console.error('Error resetting HP:', error)
+      alert(
+        "Sorry, we've encounted an error resetting the Leaderboard. Check that you are on the Rinkeby Test Network. Please also make sure you have enough ETH to cover the gas. If so, please refresh the page and try again."
+      )
+      setLeaderboardRefresh('')
     }
   }
 
@@ -252,8 +287,8 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
       // const getOriginalRandom = originalRandom
       // console.log('🚀 ~ file: index.js ~ line 209 ~ onAttackComplete ~ getOriginalRandom', getOriginalRandom)
 
-      const getNewRandom = newRandom.toNumber()
-      console.log('🚀 ~ file: index.js ~ line 212 ~ onAttackComplete ~ getNewRandom', getNewRandom)
+      // const getNewRandom = newRandom.toNumber()
+      // console.log('🚀 ~ file: index.js ~ line 212 ~ onAttackComplete ~ getNewRandom', getNewRandom)
 
       // Set TOAST TYPE message
       setToastType(randomType)
@@ -331,6 +366,7 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
     },
   }
 
+  // Render Close Mint Message
   function renderCloseMintMessage() {
     return (
       <button
@@ -577,6 +613,18 @@ const Arena = ({ characterNFT, setCharacterNFT, showMintMessage, setShowMintMess
           <div className='bout-stats'>
             <div>
               <h2>Leaderboard</h2>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <button className='cta-buttonLboard' onClick={resetLeaderboardAction}>
+                Refresh
+              </button>
+              {leaderboardRefresh === 'refreshing' && (
+                <div className='loading-indicator'>
+                  <div style={{ padding: '2px 10px 0px 10px' }}>
+                    <LoadingIndicatorBoard />
+                  </div>
+                </div>
+              )}
             </div>
             <div className='bout-stats-data'>
               <table>
