@@ -101,7 +101,6 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
   bytes32 internal _keyHash;
   uint256 internal _fee;
   address public VRFCoordinator;
-    // rinkeby: 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B
   address public LinkToken;
 
   uint256 public randomResult;
@@ -361,7 +360,7 @@ contract MyEpicGame is ERC721, VRFConsumerBase {
     // set a new one here so people can't use the existing state varaible that can be read from the contract
     getRandomNumber();
 
-    // make the randomness also based on the current Player'sinteraction with the contract
+    // make the randomness also based on the current Player's interaction with the contract
     uint256 seed = (block.timestamp + block.difficulty);
     uint256 newRandomResult = (randomResult + seed)  % 100;
 
