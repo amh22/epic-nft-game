@@ -16,17 +16,12 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`
 
 const App = () => {
   const [correctNetwork, setCorrectNetwork] = useState(false)
-
-  // A state variable we use to store our user's public wallet.
   const [currentAccount, setCurrentAccount] = useState(null)
-
   const [characterNFT, setCharacterNFT] = useState(null)
-
   const [isLoading, setIsLoading] = useState(false)
-
   const [showMintMessage, setShowMintMessage] = useState(false)
 
-  // We run this on component load
+  // We run this on component load. Gotta make sure this is async
   const checkIfWalletIsConnected = async () => {
     try {
       // First check to make sure we have access to window.ethereum
@@ -34,7 +29,7 @@ const App = () => {
 
       if (!ethereum) {
         console.log('Make sure you have MetaMask!')
-        return
+        setIsLoading(false)
       } else {
         // console.log('We have the ethereum object', ethereum)
 
@@ -58,16 +53,18 @@ const App = () => {
   }
 
   const checkCorrectNetwork = async () => {
-    const { ethereum } = window
-    let chainId = await ethereum.request({ method: 'eth_chainId' })
-    // console.log("Connected to chain " + chainId);
+    try {
+      const { ethereum } = window
+      let chainId = await ethereum.request({ method: 'eth_chainId' })
 
-    // String, hex code of the chainId of the Rinkebey test network
-    const rinkebyChainId = '0x4'
-    if (chainId !== rinkebyChainId) {
-      // alert('You are not connected to the Rinkeby Test Network!')
-      setCorrectNetwork(false)
-    } else setCorrectNetwork(true)
+      const rinkebyChainId = '0x4'
+      if (chainId !== rinkebyChainId) {
+        // alert('You are not connected to the Rinkeby Test Network!')
+        setCorrectNetwork(false)
+      } else setCorrectNetwork(true)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   // Render Methods
@@ -165,7 +162,7 @@ const App = () => {
       const { ethereum } = window
 
       if (!ethereum) {
-        alert('Get MetaMask!')
+        alert('You need to get MetaMask!')
         return
       }
 
@@ -192,7 +189,6 @@ const App = () => {
 
   /* Check WALLET is CONNECTED */
   // then check to see if the user ALREADY has minted a character and if so, display that character
-
   useEffect(() => {
     // The function we will call that interacts with out smart contract
     const fetchNFTMetadata = async () => {
